@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { BaseDomainEntity } from '../../../../core/baseEntity';
 import { Wallet } from '../../../wallets/domain/entities/wallet.entity';
 import { Column, Entity } from 'typeorm';
+import { UpdateClientCommand } from '../../application/use-cases/update-client.use-case';
 
 @Entity()
 export class Client extends BaseDomainEntity {
@@ -10,6 +11,9 @@ export class Client extends BaseDomainEntity {
 
   @Column()
   lastName: string;
+
+  @Column({ nullable: true })
+  address: string;
 
   @Column()
   status: ClientStatus;
@@ -30,6 +34,13 @@ export class Client extends BaseDomainEntity {
     client.status = ClientStatus.New;
 
     return client;
+  }
+
+  update(command: UpdateClientCommand) {
+    if (command.dto.firstName) this.firstName = command.dto.firstName;
+    if (command.dto.lastName) this.lastName = command.dto.lastName;
+    if (typeof command.dto.address !== undefined)
+      this.address = command.dto.address;
   }
 }
 
@@ -60,4 +71,11 @@ export class FileInfo extends BaseDomainEntity {
 export class CreateClientDTO {
   firstName: string;
   lastName: string;
+}
+
+export class UpdateClientDTO {
+  id: string;
+  firstName?: string;
+  lastName?: string;
+  address?: string;
 }

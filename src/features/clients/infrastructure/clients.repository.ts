@@ -16,4 +16,8 @@ export class ClientsRepository {
   async save(client: Client): Promise<void> {
     await this.clientsRepo.save(client);
   }
+
+  async delete(id: string): Promise<void> {
+    await this.clientsRepo.delete(id);
+  }
 }

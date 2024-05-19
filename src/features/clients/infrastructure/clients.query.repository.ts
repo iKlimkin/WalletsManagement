@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import { Client } from '../domain/entities/client.entity';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { Injectable } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
 
 @Injectable()
@@ -16,8 +16,12 @@ export class ClientsQueryRepository {
   }
 
   async getById(id: string): Promise<ClientViewModel> {
-    const entity = await this.ormRepo.findOneBy({ id });
-    return ClientsQueryRepository.mapClientEntityToClientViewModel(entity);
+    try {
+      const entity = await this.ormRepo.findOneBy({ id });
+      return ClientsQueryRepository.mapClientEntityToClientViewModel(entity);
+    } catch (error) {
+      return null;
+    }
   }
 
   static mapClientEntityToClientViewModel = (
@@ -26,7 +30,8 @@ export class ClientsQueryRepository {
     id: client.id,
     firstName: client.firstName,
     lastName: client.lastName,
-  });
+    address: client.address,
+  }) || null;
 }
 
 export class ClientViewModel {
@@ -38,4 +43,7 @@ export class ClientViewModel {
 
   @ApiProperty()
   lastName: string;
+
+  @ApiProperty()
+  address: string;
 }

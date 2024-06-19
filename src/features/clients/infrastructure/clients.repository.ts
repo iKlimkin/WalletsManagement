@@ -3,8 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Client } from '../domain/entities/client.entity';
 
+export interface BaseRepository<T> {
+  getById(id: string): Promise<T>;
+  save(entity: T): Promise<void>;
+  delete(id: string): Promise<void>;
+}
+
 @Injectable()
-export class ClientsRepository {
+export class ClientsRepository implements BaseRepository<Client> {
   constructor(
     @InjectRepository(Client) private readonly clientsRepo: Repository<Client>,
   ) {}

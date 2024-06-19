@@ -4,12 +4,15 @@ import {
   Client,
   CreateClientDTO,
   UpdateClientDTO,
+  validationConstants,
 } from '../../src/features/clients/domain/entities/client.entity';
 import { SuperTestBody } from '../shared/bodyTypes';
 import { getAppForE2ETesting } from '../shared/tests.utils';
 import { ClientManager } from '../shared/managers/ClientManager';
 import { ClientsAdminRouting } from '../../src/infrastructure/routing/clients.route';
-import { last } from 'rxjs';
+import { SecurityGovApiAdapter } from '../../src/features/clients/infrastructure/security-gov-api.adapter';
+import { NotificationResponse } from '../../src/core/validation/notification';
+import { ClientViewModel } from '../../src/features/clients/infrastructure/clients.query.repository';
 
 export enum NavigateEnum {
   clients = '/clients',
@@ -21,9 +24,17 @@ describe('ClientsController.admin.web (e2e)', () => {
   let clientsAdminRouting: ClientsAdminRouting;
   const navigateClients = NavigateEnum.clients;
   let clientsManager: ClientManager;
+  let securityMock: SecurityGovApiAdapter;
+  const lastScammerName = 'Smith';
+  securityMock = {
+    isScammer: async (firstName, lastName) => lastName === 'Smith',
+  };
 
   beforeAll(async () => {
-    const settings = await getAppForE2ETesting();
+    let settings = await getAppForE2ETesting((module) => {
+      module.overrideProvider(SecurityGovApiAdapter).useValue(securityMock);
+    });
+
     app = settings.app;
     httpServer = settings.httpServer;
     clientsAdminRouting = new ClientsAdminRouting();
@@ -39,7 +50,7 @@ describe('ClientsController.admin.web (e2e)', () => {
     return request(httpServer).get(navigateClients).expect(200).expect([]);
   });
   it('/clients (POST / GET)', async () => {
-    const dto: CreateClientDTO = Client.createEntity({
+    const dto: CreateClientDTO = await Client.createEntity({
       firstName: 'firstName',
       lastName: 'lastName',
     });
@@ -53,29 +64,46 @@ describe('ClientsController.admin.web (e2e)', () => {
 
     const createdClient = await clientsManager.createClient(dto);
 
-    const client = await clientsManager.getClient(createdClient.id);
+    const client = await clientsManager.getClient(createdClient.data!.item.id);
     clientsManager.checkModel(client, expectedCreatedClient);
 
     const clients = await clientsManager.getClients();
-
-    /**
-     * const filteredClients = clients.filter(c => c.id === client.id);
-     * expect(filteredClients.length).toBe(1);
-     */
 
     expect(clients).toEqual(
       expect.arrayContaining([expect.objectContaining({ id: client.id })]),
     );
   });
+  it('/clients (POST) - try create client with incorrect fields', async () => {
+    const dto: CreateClientDTO = await Client.createEntity({
+      firstName: '',
+      lastName: 'lastName',
+    });
+
+    const result = await clientsManager.createClient(dto, HttpStatus.BAD_REQUEST);
+    expect(result.extensions.length).toBe(1)
+    expect(result.extensions[0].key).toBe('firstName')
+  });
   it('/clients update full client entity (PATCH)', async () => {
-    const createClientDto: CreateClientDTO = Client.createEntity({
+    const createClientDto: CreateClientDTO = await Client.createEntity({
       firstName: 'firstName',
       lastName: 'lastName',
     });
     const updateClientDto: Omit<UpdateClientDTO, 'id'> = {
       firstName: 'Marcus',
       lastName: 'Aurelius',
-      address: 'Rome',
+      address: '-'.repeat(validationConstants.address.minLength + 1),
+    };
+
+    const badUpdateClientDto: Omit<UpdateClientDTO, 'id'> = {
+      firstName: 'Marcus',
+      lastName: 'Aurelius',
+      address: '-'.repeat(validationConstants.address.minLength - 1),
+    };
+
+    const badUpdateClientDto2: Omit<UpdateClientDTO, 'id'> = {
+      firstName: 'Marcus',
+      lastName: 'Aurelius',
+      address: '-'.repeat(validationConstants.address.maxLength + 1),
     };
 
     // const expectUpdatedClient = {
@@ -87,49 +115,37 @@ describe('ClientsController.admin.web (e2e)', () => {
 
     const createdClient = await clientsManager.createClient(createClientDto);
     await clientsManager.updateClientAndCheck(
-      createdClient.id,
+      createdClient.data!.item.id,
       updateClientDto,
+    );
+
+    await clientsManager.updateClientAndCheck(
+      createdClient.data!.item.id,
+      badUpdateClientDto,
+      HttpStatus.BAD_REQUEST,
+    );
+    await clientsManager.updateClientAndCheck(
+      createdClient.data!.item.id,
+      badUpdateClientDto2,
+      HttpStatus.BAD_REQUEST,
     );
   });
 
-  it.skip('/clients update address of client (PATCH)', async () => {
-    const dto: Omit<UpdateClientDTO, 'id'> = {
-      firstName: 'Marcus',
-      lastName: 'Aurelius',
-      address: 'Rome',
-    };
-
-    const expectUpdatedClient = {
-      firstName: dto.firstName,
-      lastName: dto.lastName,
-      address: dto.address,
-      id: expect.any(String),
-    };
-    let id: string;
-
-    await request(httpServer)
-      .put(navigateClients)
-      .send(dto)
-      .expect(HttpStatus.NO_CONTENT)
-      .expect(({ body }: SuperTestBody<Client>) => {
-        expect(body).toEqual(expectUpdatedClient);
-        id = body.id;
-      });
-
-    await request(httpServer)
-      .get(`${navigateClients}/:${id!}`)
-      .expect(({ body }: SuperTestBody) => {
-        expect(body).toEqual(expectUpdatedClient);
-      });
+  it(`try to create scammer `, async () => {
+    const createScammerDto: CreateClientDTO = await Client.createEntity({
+      firstName: 'firstName',
+      lastName: lastScammerName,
+    });
+    await clientsManager.createClient(createScammerDto, HttpStatus.BAD_REQUEST);
   });
 
   it('/clients (DELETE)', async () => {
-    const dto: CreateClientDTO = Client.createEntity({
+    const dto: CreateClientDTO = await Client.createEntity({
       firstName: 'firstName',
       lastName: 'lastName',
     });
 
-    const result = await clientsManager.createClient(dto);
-    await clientsManager.deleteClient(result.id);
+    const createdClient = await clientsManager.createClient(dto);
+    await clientsManager.deleteClient(createdClient.data!.item.id);
   });
 });

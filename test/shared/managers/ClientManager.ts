@@ -1,33 +1,34 @@
 import { HttpStatus, INestApplication } from '@nestjs/common';
-import { CreateClientCommand } from '../../../src/features/clients/application/use-cases/create-client.use-case';
-import { NavigateEnum } from '../../clients/admin-web.e2e-spec';
+import * as request from 'supertest';
 import {
   CreateClientDTO,
-  Client,
   UpdateClientDTO,
 } from '../../../src/features/clients/domain/entities/client.entity';
-import * as request from 'supertest';
-import { SuperTestBody } from '../bodyTypes';
 import { ClientViewModel } from '../../../src/features/clients/infrastructure/clients.query.repository';
 import { ClientsAdminRouting } from '../../../src/infrastructure/routing/clients.route';
+import { SuperTestBody } from '../bodyTypes';
+import { NotificationResponse } from '../../../src/core/validation/notification';
+
+type ClientViewType = NotificationResponse<{ item: ClientViewModel }>;
 
 export class ClientManager {
-  private application = this.app.getHttpServer();
+  private readonly application = this.app.getHttpServer();
   constructor(
-    private app: INestApplication,
+    private readonly app: INestApplication,
     protected readonly routing: ClientsAdminRouting,
   ) {}
 
   async createClient(
     dto: CreateClientDTO,
     expectStatus = HttpStatus.CREATED,
-  ): Promise<ClientViewModel> {
-    let client: ClientViewModel;
+  ): Promise<NotificationResponse<{ item: ClientViewModel }>> {
+    let client: ClientViewType;
+
     await request(this.application)
       .post(this.routing.createOne())
       .send(dto)
       .expect(expectStatus)
-      .expect(({ body }: SuperTestBody<ClientViewModel>) => {
+      .expect(({ body }: SuperTestBody<ClientViewType>) => {
         client = body;
       });
 
@@ -88,17 +89,18 @@ export class ClientManager {
   ) {
     const clientBeforeUpdate = await this.getClient(id);
 
-    await request(this.application)
+    const response = await request(this.application)
       .patch(this.routing.updateOne(id))
       .send(dto)
       .expect(expectStatus);
 
     const clientAfterUpdate = await this.getClient(id);
 
-    this.checkModel(clientAfterUpdate, {
-      ...clientBeforeUpdate,
-      ...dto,
-    });
+    response.statusCode === HttpStatus.NO_CONTENT &&
+      this.checkModel(clientAfterUpdate, {
+        ...clientBeforeUpdate,
+        ...dto,
+      });
   }
 
   async deleteClient(id: string, expectStatus = HttpStatus.NO_CONTENT) {

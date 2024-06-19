@@ -1,10 +1,13 @@
 import { INestApplication } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test, TestingModule, TestingModuleBuilder } from '@nestjs/testing';
 import { DataSource } from 'typeorm';
 import { AppModule } from '../../src/app.module';
 import { configApp } from '../../src/config/configApp';
 
-const truncateDBTables = async (app: INestApplication, dbOwnerUserName: string) => {
+const truncateDBTables = async (
+  app: INestApplication,
+  dbOwnerUserName: string,
+) => {
   const dataSource = await app.resolve(DataSource);
 
   await dataSource.query(
@@ -26,10 +29,16 @@ const truncateDBTables = async (app: INestApplication, dbOwnerUserName: string) 
   );
 };
 
-export const getAppForE2ETesting = async () => {
-  const appModule: TestingModule = await Test.createTestingModule({
+export const getAppForE2ETesting = async (
+  setupModuleBuilder: (appModuleBuilder: TestingModuleBuilder) => void,
+) => {
+  const appModuleBuilder: TestingModuleBuilder = Test.createTestingModule({
     imports: [AppModule],
-  }).compile();
+  });
+
+  setupModuleBuilder && setupModuleBuilder(appModuleBuilder);
+
+  const appModule = await appModuleBuilder.compile();
 
   const app = appModule.createNestApplication();
   const httpServer = app.getHttpServer();

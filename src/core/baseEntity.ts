@@ -1,10 +1,8 @@
 import {
   Column,
-  PrimaryGeneratedColumn,
   CreateDateColumn,
-  UpdateDateColumn,
   PrimaryColumn,
-  Timestamp,
+  UpdateDateColumn
 } from 'typeorm';
 
 export class BaseDomainEntity {

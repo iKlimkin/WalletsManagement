@@ -3,6 +3,24 @@ import { BaseDomainEntity } from '../../../../core/baseEntity';
 import { Wallet } from '../../../wallets/domain/entities/wallet.entity';
 import { Column, Entity } from 'typeorm';
 import { UpdateClientCommand } from '../../application/use-cases/update-client.use-case';
+import { ApiProperty } from '@nestjs/swagger';
+import { Length, validate } from 'class-validator';
+import { BadRequestException } from '@nestjs/common';
+
+export const validationConstants = {
+  firstName: {
+    minLength: 2,
+    maxLength: 30,
+  },
+  lastName: {
+    minLength: 2,
+    maxLength: 30,
+  },
+  address: {
+    minLength: 10,
+    maxLength: 30,
+  },
+};
 
 @Entity()
 export class Client extends BaseDomainEntity {
@@ -25,13 +43,18 @@ export class Client extends BaseDomainEntity {
 
   passportScan: FileInfo;
 
-  static createEntity(clientDto: CreateClientDTO) {
+  static async createEntity(clientDto: CreateClientDTO) {
     const client = new Client();
 
     client.id = randomUUID();
     client.firstName = clientDto.firstName;
     client.lastName = clientDto.lastName;
     client.status = ClientStatus.New;
+
+    const validationErrors = await validate(client);
+
+    if (validationErrors.length > 0)
+      throw new BadRequestException(validationErrors);
 
     return client;
   }
@@ -69,13 +92,38 @@ export class FileInfo extends BaseDomainEntity {
 }
 
 export class CreateClientDTO {
+  @ApiProperty()
+  @Length(
+    validationConstants.firstName.minLength,
+    validationConstants.firstName.maxLength,
+  )
   firstName: string;
+  @ApiProperty()
+  @Length(
+    validationConstants.lastName.minLength,
+    validationConstants.lastName.maxLength,
+  )
   lastName: string;
 }
 
 export class UpdateClientDTO {
   id: string;
+  @ApiProperty()
+  @Length(
+    validationConstants.firstName.minLength,
+    validationConstants.firstName.maxLength,
+  )
   firstName?: string;
+  @ApiProperty()
+  @Length(
+    validationConstants.lastName.minLength,
+    validationConstants.lastName.maxLength,
+  )
   lastName?: string;
+  @ApiProperty()
+  @Length(
+    validationConstants.address.minLength,
+    validationConstants.address.maxLength,
+  )
   address?: string;
 }

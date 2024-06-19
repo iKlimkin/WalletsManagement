@@ -4,8 +4,15 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
 
+export interface BaseQueryRepository<T> {
+  getAll(): Promise<T[]>;
+  getById(id: string): Promise<T>;
+}
+
 @Injectable()
-export class ClientsQueryRepository {
+export class ClientsQueryRepository
+  implements BaseQueryRepository<ClientViewModel>
+{
   constructor(
     @InjectDataSource() private readonly dataSource: DataSource,
     @InjectRepository(Client) private ormRepo: Repository<Client>,
@@ -24,14 +31,13 @@ export class ClientsQueryRepository {
     }
   }
 
-  static mapClientEntityToClientViewModel = (
-    client: Client,
-  ): ClientViewModel => ({
-    id: client.id,
-    firstName: client.firstName,
-    lastName: client.lastName,
-    address: client.address,
-  }) || null;
+  static mapClientEntityToClientViewModel = (client: Client): ClientViewModel =>
+    ({
+      id: client.id,
+      firstName: client.firstName,
+      lastName: client.lastName,
+      address: client.address,
+    }) || null;
 }
 
 export class ClientViewModel {

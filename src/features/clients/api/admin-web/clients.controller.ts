@@ -20,20 +20,20 @@ import {
   UpdateClientDTO,
 } from '../../domain/entities/client.entity';
 import { ClientsQueryRepository } from '../../infrastructure/clients.query.repository';
+import { ClientCrudApiService } from '../services/base-crud-api.service';
 
 @Controller('clients')
 export class ClientsController {
   constructor(
     private readonly clientsQueryRepository: ClientsQueryRepository,
     private readonly commandBus: CommandBus,
+    protected readonly clientCrudApiService: ClientCrudApiService,
   ) {}
 
   @Post()
   async create(@Body() createClientDto: CreateClientDTO) {
     const command = new CreateClientCommand(createClientDto);
-    const clientEntity = await this.commandBus.execute(command);
-
-    return this.clientsQueryRepository.getById(clientEntity.id);
+    return this.clientCrudApiService.create(command);
   }
 
   @Get()

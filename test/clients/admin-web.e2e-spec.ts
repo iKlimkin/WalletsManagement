@@ -1,11 +1,5 @@
 import { HttpServer, HttpStatus, INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import {
-  Client,
-  CreateClientDTO,
-  UpdateClientDTO,
-  validationConstants,
-} from '../../src/features/clients/domain/entities/client.entity';
 import { SuperTestBody } from '../shared/bodyTypes';
 import { getAppForE2ETesting } from '../shared/tests.utils';
 import { ClientManager } from '../shared/managers/ClientManager';
@@ -13,6 +7,12 @@ import { ClientsAdminRouting } from '../../src/infrastructure/routing/clients.ro
 import { SecurityGovApiAdapter } from '../../src/features/clients/infrastructure/security-gov-api.adapter';
 import { NotificationResponse } from '../../src/core/validation/notification';
 import { ClientViewModel } from '../../src/features/clients/infrastructure/clients.query.repository';
+import {
+  CreateClientDTO,
+  Client,
+  UpdateClientDTO,
+  validationConstants,
+} from '../../src/features/clients/domain/entities/client.entity';
 
 export enum NavigateEnum {
   clients = '/clients',
@@ -79,9 +79,12 @@ describe('ClientsController.admin.web (e2e)', () => {
       lastName: 'lastName',
     });
 
-    const result = await clientsManager.createClient(dto, HttpStatus.BAD_REQUEST);
-    expect(result.extensions.length).toBe(1)
-    expect(result.extensions[0].key).toBe('firstName')
+    const result = await clientsManager.createClient(
+      dto,
+      HttpStatus.BAD_REQUEST,
+    );
+    expect(result.extensions.length).toBe(1);
+    expect(result.extensions[0].key).toBe('firstName');
   });
   it('/clients update full client entity (PATCH)', async () => {
     const createClientDto: CreateClientDTO = await Client.createEntity({

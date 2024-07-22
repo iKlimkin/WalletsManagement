@@ -1,10 +1,11 @@
 import {
-  ValidationPipe,
-  INestApplication,
   BadRequestException,
+  INestApplication,
   ValidationError,
+  ValidationPipe,
 } from '@nestjs/common';
 import { swaggerSetup } from './swaggerSetup';
+import { validationErrorsMapper } from '../core/validation/validation-utils';
 
 export const pipesSetup = (app: INestApplication) => {
   app.useGlobalPipes(
@@ -13,22 +14,10 @@ export const pipesSetup = (app: INestApplication) => {
       transform: true,
       stopAtFirstError: true,
       exceptionFactory(errors: ValidationError[]) {
-        const customErrors: ValidationPipeErrorType[] = [];
-
-        errors.forEach((errors: ValidationError) => {
-          const constraints = errors.constraints;
-
-          if (constraints) {
-            const constraintKeys = Object.keys(constraints);
-
-            constraintKeys.forEach((cKey: string) => {
-              const message = constraints[cKey];
-
-              customErrors.push({ message, field: errors.property });
-            });
-          }
-        });
-
+        const customErrors: ValidationPipeErrorType[] =
+          validationErrorsMapper.mapValidationErrorToValidationPipeErrorTArray(
+            errors,
+          );
         throw new BadRequestException(customErrors);
       },
     }),

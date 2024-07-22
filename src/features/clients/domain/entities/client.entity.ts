@@ -1,11 +1,11 @@
-import { randomUUID } from 'node:crypto';
-import { BaseDomainEntity } from '../../../../core/baseEntity';
-import { Wallet } from '../../../wallets/domain/entities/wallet.entity';
-import { Column, Entity } from 'typeorm';
-import { UpdateClientCommand } from '../../application/use-cases/update-client.use-case';
 import { ApiProperty } from '@nestjs/swagger';
-import { Length, validate } from 'class-validator';
-import { BadRequestException } from '@nestjs/common';
+import { Length } from 'class-validator';
+import { randomUUID } from 'node:crypto';
+import { Column, Entity } from 'typeorm';
+import { BaseDomainEntity } from '../../../../core/baseEntity';
+import { checkEntityValidation } from '../../../../core/validation/validation-utils';
+import { Wallet } from '../../../wallets/domain/entities/wallet.entity';
+import { UpdateClientCommand } from '../../application/use-cases/update-client.use-case';
 
 export const validationConstants = {
   firstName: {
@@ -51,10 +51,11 @@ export class Client extends BaseDomainEntity {
     client.lastName = clientDto.lastName;
     client.status = ClientStatus.New;
 
-    const validationErrors = await validate(client);
+    await checkEntityValidation(client);
+    // const validationErrors = await validate(client);
 
-    if (validationErrors.length > 0)
-      throw new BadRequestException(validationErrors);
+    // if (validationErrors.length > 0)
+    //   throw new BadRequestException(validationErrors);
 
     return client;
   }

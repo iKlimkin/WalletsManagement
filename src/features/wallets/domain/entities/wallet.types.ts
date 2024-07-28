@@ -1,0 +1,14 @@
+import { BaseDomainEntity } from '../../../../core/baseEntity';
+import { Client } from '../../../clients/domain/entities/client.entity';
+import { Wallet } from './wallet.entity';
+
+export class WalletLimits extends BaseDomainEntity {
+  perDay: number | null;
+  perWeek: number | null;
+  perMonth: number | null;
+}
+export class WalletSharing extends BaseDomainEntity {
+  client: Client;
+  wallet: Wallet;
+  limits: WalletLimits;
+}

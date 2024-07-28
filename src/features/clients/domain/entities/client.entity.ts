@@ -1,11 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Length } from 'class-validator';
 import { randomUUID } from 'node:crypto';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 import { BaseDomainEntity } from '../../../../core/baseEntity';
-import { checkEntityValidation } from '../../../../core/validation/validation-utils';
+import { validateEntity } from '../../../../core/validation/validation-utils';
 import { Wallet } from '../../../wallets/domain/entities/wallet.entity';
 import { UpdateClientCommand } from '../../application/use-cases/update-client.use-case';
+import { NotificationResponse } from '../../../../core/validation/notification';
 
 export const validationConstants = {
   firstName: {
@@ -39,11 +40,15 @@ export class Client extends BaseDomainEntity {
   @Column({ nullable: true })
   totalBalance: string;
 
+  @OneToMany(() => Wallet, (wallet) => wallet.client)
   wallets: Wallet[];
 
+  // @Column()
   passportScan: FileInfo;
 
-  static async createEntity(clientDto: CreateClientDTO) {
+  static async createEntity(
+    clientDto: CreateClientDTO,
+  ): Promise<NotificationResponse<Client>> {
     const client = new Client();
 
     client.id = randomUUID();
@@ -51,20 +56,18 @@ export class Client extends BaseDomainEntity {
     client.lastName = clientDto.lastName;
     client.status = ClientStatus.New;
 
-    await checkEntityValidation(client);
-    // const validationErrors = await validate(client);
-
-    // if (validationErrors.length > 0)
-    //   throw new BadRequestException(validationErrors);
-
-    return client;
+    return validateEntity(client);
   }
 
-  update(command: UpdateClientCommand) {
+  async update(
+    command: UpdateClientCommand,
+  ): Promise<NotificationResponse<Client>> {
     if (command.dto.firstName) this.firstName = command.dto.firstName;
     if (command.dto.lastName) this.lastName = command.dto.lastName;
     if (typeof command.dto.address !== undefined)
       this.address = command.dto.address;
+
+    return validateEntity(this);
   }
 }
 

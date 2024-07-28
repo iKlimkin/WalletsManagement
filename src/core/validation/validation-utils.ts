@@ -11,7 +11,7 @@ export class DomainError extends Error {
   }
 }
 
-export const checkEntityValidation = async (entity: any) => {
+export const validateEntityOrThrowAsync = async (entity: any) => {
   try {
     await validateOrReject(entity);
   } catch (error) {
@@ -25,6 +25,22 @@ export const checkEntityValidation = async (entity: any) => {
       responseNotification,
     );
   }
+};
+export const validateEntity = async <T extends Object>(
+  entity: T,
+): Promise<NotificationResponse<T>> => {
+  try {
+    await validateOrReject(entity);
+  } catch (error) {
+    const responseNotification: NotificationResponse = mapErrorsToNotification(
+      validationErrorsMapper.mapValidationErrorToValidationPipeErrorTArray(
+        error,
+      ),
+    );
+
+    return responseNotification;
+  }
+  return new NotificationResponse<T>(entity);
 };
 
 export const mapErrorsToNotification = (errors: ValidationPipeErrorType[]) => {

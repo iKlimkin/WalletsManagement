@@ -20,7 +20,7 @@ import {
   UpdateClientDTO,
 } from '../../domain/entities/client.entity';
 import { ClientsQueryRepository } from '../../infrastructure/clients.query.repository';
-import { ClientCrudApiService } from '../services/base-crud-api.service';
+import { ClientCrudApiService } from '../services/clients-curd-api.service';
 
 @Controller('clients')
 export class ClientsController {

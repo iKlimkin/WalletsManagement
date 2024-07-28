@@ -1,9 +1,12 @@
 export class NotificationResponse<T = null> {
+  constructor(data: T | null = null) {
+    this.data = data;
+  }
   extensions: NotificationExtension[] = [];
   code = 0;
   data: T | null = null;
 
-  hasError() {
+  get hasError() {
     return this.code !== 0;
   }
 

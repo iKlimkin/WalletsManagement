@@ -21,21 +21,19 @@ export class CreateClientUseCase
     command: CreateClientCommand,
   ): Promise<NotificationResponse<Client>> {
     const { dto } = command;
-    const notice = new NotificationResponse<Client>();
 
     const scammer = await this.security.isScammer(dto.firstName, dto.lastName);
 
     if (scammer) {
-      notice.addError('Client is a scammer', null, 2);
+      const notice = new NotificationResponse<Client>();
+      notice.addError('Client is a scammer', 'lastName', 2);
       return notice;
     }
 
-    const client = await Client.createEntity(dto);
+    const domainNotification = await Client.createEntity(dto);
+    if (domainNotification.hasError) return domainNotification;
+    await this.clientsRepository.save(domainNotification.data);
 
-    await this.clientsRepository.save(client);
-
-    notice.addData(client);
-
-    return notice;
+    return domainNotification;
   }
 }

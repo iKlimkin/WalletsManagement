@@ -18,6 +18,7 @@ export const pipesSetup = (app: INestApplication) => {
           validationErrorsMapper.mapValidationErrorToValidationPipeErrorTArray(
             errors,
           );
+
         throw new BadRequestException(customErrors);
       },
     }),

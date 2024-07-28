@@ -4,9 +4,9 @@ import { DataSource } from 'typeorm';
 import { AppModule } from '../../src/app.module';
 import { configApp } from '../../src/config/configApp';
 
-const truncateDBTables = async (
+export const truncateDBTables = async (
   app: INestApplication,
-  dbOwnerUserName: string,
+  dbOwnerUserName: string = 'postgres',
 ) => {
   const dataSource = await app.resolve(DataSource);
 
@@ -30,7 +30,7 @@ const truncateDBTables = async (
 };
 
 export const getAppForE2ETesting = async (
-  setupModuleBuilder: (appModuleBuilder: TestingModuleBuilder) => void,
+  setupModuleBuilder?: (appModuleBuilder: TestingModuleBuilder) => void,
 ) => {
   const appModuleBuilder: TestingModuleBuilder = Test.createTestingModule({
     imports: [AppModule],
@@ -44,7 +44,8 @@ export const getAppForE2ETesting = async (
   const httpServer = app.getHttpServer();
   configApp(app);
   await app.init();
-  await truncateDBTables(app, 'postgres');
+
+  await truncateDBTables(app);
 
   return { app, httpServer };
 };

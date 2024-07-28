@@ -8,7 +8,10 @@ import {
 import { Request, Response } from 'express';
 import { NotificationResponse } from '../core/validation/notification';
 import { ValidationPipeErrorType } from './pipesSetup';
-import { DomainError } from '../core/validation/validation-utils';
+import {
+  DomainError,
+  mapErrorsToNotification,
+} from '../core/validation/validation-utils';
 
 @Catch(DomainError)
 export class ErrorExceptionFilter implements ExceptionFilter {
@@ -29,27 +32,22 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
-    const { message, key, statusCode } = exception.getResponse() as any;
+    const { message, key } = exception.getResponse() as any;
+    const notificationResponse = exception.getResponse();
+    const status = exception.getStatus();
 
-    if (statusCode === HttpStatus.BAD_REQUEST) {
-      if (response instanceof NotificationResponse) {
-        response.status(statusCode).send(message);
+    if (status === HttpStatus.BAD_REQUEST) {
+      const localResponse = exception.getResponse();
+      if (localResponse instanceof NotificationResponse) {
+        response.status(status).send(notificationResponse);
         return;
       }
-      const notificationResult = new NotificationResponse();
-      const code = 1;
-      if (Array.isArray(message)) {
-        message.forEach((m: ValidationPipeErrorType) => {
-          notificationResult.addError(m.message, m.field, code);
-        });
-      } else {
-        notificationResult.addError(message, null, code);
-      }
+      const resultNotification = mapErrorsToNotification(message);
 
-      response.status(statusCode).send(notificationResult);
+      response.status(status).send(resultNotification);
     } else {
-      response.status(statusCode).json({
-        statusCode,
+      response.status(status).json({
+        status,
         timestamp: new Date().toISOString(),
         location: key,
         error: message,

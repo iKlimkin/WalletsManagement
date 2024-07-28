@@ -2,12 +2,16 @@ import {
   Column,
   CreateDateColumn,
   PrimaryColumn,
-  UpdateDateColumn
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 export class BaseDomainEntity {
-  @PrimaryColumn('uuid')
+  @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  // @PrimaryColumn('uuid')
+  // id: string;
 
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: string;
@@ -17,6 +21,6 @@ export class BaseDomainEntity {
 
   @Column({ nullable: true })
   createBy: string;
-  @Column({nullable: true})
+  @Column({ nullable: true })
   updateBy: string;
 }

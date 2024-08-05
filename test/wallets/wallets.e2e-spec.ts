@@ -31,7 +31,6 @@ aDescribe(skipSettings.for(e2eTestNamesEnum.WALLET))(
     });
 
     afterAll(async () => {
-      await truncateDBTables(app)
       await app.close();
     });
 

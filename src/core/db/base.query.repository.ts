@@ -1,5 +1,4 @@
-export interface BaseRepository<T> {
+export interface BaseQueryRepository<T> {
+  getAll(): Promise<T[]>;
   getById(id: string): Promise<T>;
-  save(entity: T): Promise<void>;
-  delete(id: string): Promise<void>;
 }

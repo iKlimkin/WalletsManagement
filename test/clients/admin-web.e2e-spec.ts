@@ -1,24 +1,17 @@
 import { HttpServer, HttpStatus, INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { SuperTestBody } from '../shared/bodyTypes';
-import { getAppForE2ETesting } from '../shared/tests.utils';
-import { ClientManager } from '../shared/managers/ClientManager';
-import { ClientsAdminRouting } from '../../src/infrastructure/routing/clients.route';
-import { SecurityGovApiAdapter } from '../../src/features/clients/infrastructure/security-gov-api.adapter';
-import { NotificationResponse } from '../../src/core/validation/notification';
-import { ClientViewModel } from '../../src/features/clients/infrastructure/clients.query.repository';
 import {
-  CreateClientDTO,
   Client,
   UpdateClientDTO,
-  validationConstants,
+  validationConstants
 } from '../../src/features/clients/domain/entities/client.entity';
+import { SecurityGovApiAdapter } from '../../src/features/clients/infrastructure/security-gov-api.adapter';
+import { NavigateEnum } from '../../src/infrastructure/routing/base.prefix';
+import { ClientsAdminRouting } from '../../src/infrastructure/routing/clients.route';
 import { aDescribe } from '../shared/aDescribe';
+import { ClientManager } from '../shared/managers/ClientManager';
 import { e2eTestNamesEnum, skipSettings } from '../shared/skip-test.settings';
-
-export enum NavigateEnum {
-  clients = '/clients',
-}
+import { getAppForE2ETesting } from '../shared/tests.utils';
 
 aDescribe(skipSettings.for(e2eTestNamesEnum.CLIENT))(
   'ClientsController.admin.web (e2e)',

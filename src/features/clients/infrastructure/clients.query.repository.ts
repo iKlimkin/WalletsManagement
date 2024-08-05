@@ -3,16 +3,13 @@ import { Client } from '../domain/entities/client.entity';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
-import { BaseQueryRepository } from '../../../core/db/base.repository';
+import { BaseQueryRepository } from '../../../core/db/base.query.repository';
 
 @Injectable()
 export class ClientsQueryRepository
   implements BaseQueryRepository<ClientViewModel>
 {
-  constructor(
-    @InjectDataSource() private readonly dataSource: DataSource,
-    @InjectRepository(Client) private ormRepo: Repository<Client>,
-  ) {}
+  constructor(@InjectRepository(Client) private ormRepo: Repository<Client>) {}
   async getAll(): Promise<ClientViewModel[]> {
     const result = await this.ormRepo.find();
     return result.map(ClientsQueryRepository.mapClientEntityToClientViewModel);

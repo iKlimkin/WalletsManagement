@@ -10,6 +10,7 @@ import {
   Patch,
   Post,
   Put,
+  Scope,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { CreateClientCommand } from '../../application/use-cases/create-client.use-case';
@@ -21,8 +22,9 @@ import {
 } from '../../domain/entities/client.entity';
 import { ClientsQueryRepository } from '../../infrastructure/clients.query.repository';
 import { ClientCrudApiService } from '../services/clients-curd-api.service';
+import { NavigateEnum } from '../../../../infrastructure/routing/base.prefix';
 
-@Controller('clients')
+@Controller({ path: NavigateEnum.clients, scope: Scope.REQUEST })
 export class ClientsController {
   constructor(
     private readonly clientsQueryRepository: ClientsQueryRepository,

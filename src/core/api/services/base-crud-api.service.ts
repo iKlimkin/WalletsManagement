@@ -2,7 +2,7 @@ import { BadRequestException } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { BaseDomainEntity } from '../../baseEntity';
 import { NotificationResponse } from '../../validation/notification';
-import { BaseQueryRepository } from '../../db/base.repository';
+import { BaseQueryRepository } from '../../db/base.query.repository';
 
 export class ItemCreatedNotification<TViewModel> extends NotificationResponse<{
   item: TViewModel;

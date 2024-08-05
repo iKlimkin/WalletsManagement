@@ -1,18 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
-import { BaseQueryRepository } from '../../../core/db/base.repository';
-import { Wallet } from '../domain/entities/wallet.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { BaseQueryRepository } from '../../../core/db/base.query.repository';
+import { Wallet } from '../domain/entities/wallet.entity';
 
 @Injectable()
 export class WalletsQueryRepository
   implements BaseQueryRepository<WalletViewModel>
 {
-  constructor(
-    @InjectDataSource() private readonly dataSource: DataSource,
-    @InjectRepository(Wallet) private ormRepo: Repository<Wallet>,
-  ) {}
+  constructor(@InjectRepository(Wallet) private ormRepo: Repository<Wallet>) {}
   async getAll(): Promise<WalletViewModel[]> {
     const result = await this.ormRepo.find();
     return result.map(WalletsQueryRepository.mapEntityToViewModel);

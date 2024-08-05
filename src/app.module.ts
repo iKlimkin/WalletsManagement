@@ -1,9 +1,10 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ClientsModule } from './features/clients/clients.module';
 import { WalletsModule } from './features/wallets/wallets.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AsyncStorageMiddleware } from './config/local-storage.middleware';
 
 @Module({
   imports: [
@@ -23,4 +24,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(AsyncStorageMiddleware).forRoutes('*');
+  }
+}

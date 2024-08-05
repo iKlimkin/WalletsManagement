@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { DynamicModule, Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ClientsController } from './api/admin-web/clients.controller';
@@ -11,6 +11,7 @@ import { ClientsQueryRepository } from './infrastructure/clients.query.repositor
 import { ClientsRepository } from './infrastructure/clients.repository';
 import { SecurityGovApiAdapter } from './infrastructure/security-gov-api.adapter';
 import { ClientCrudApiService } from './api/services/clients-curd-api.service';
+import { StoreService } from './store.service';
 
 const useCases = [
   CreateClientUseCase,
@@ -27,7 +28,15 @@ const useCases = [
     ClientsRepository,
     SecurityGovApiAdapter,
     ClientCrudApiService,
+    StoreService,
     ...useCases,
   ],
 })
-export class ClientsModule {}
+export class ClientsModule {
+  static forRoot(providers: any[]): DynamicModule {
+    return {
+      module: ClientsModule,
+      providers,
+    };
+  }
+}

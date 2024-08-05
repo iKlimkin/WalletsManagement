@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { BaseQueryRepository } from '../../../core/db/base.repository';
 import { MoneyTransfer } from '../domain/entities/money-transfer.entity';
+import { BaseQueryRepository } from '../../../core/db/base.query.repository';
 
 @Injectable()
 export class MoneyTransferQueryRepository
@@ -18,7 +18,7 @@ export class MoneyTransferQueryRepository
     try {
       const entity = await this.ormRepo.findOneBy({ id });
       if (!entity) return null;
-      
+
       return MoneyTransferQueryRepository.mapEntityToViewModel(entity);
     } catch (error) {
       console.log(error);

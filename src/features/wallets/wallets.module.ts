@@ -13,6 +13,7 @@ import { MakeMoneyTransferUseCase } from './application/use-cases/make-transfer.
 import { MoneyTransferRepository } from './infrastructure/money-transfer.repository';
 import { MoneyTransferQueryRepository } from './infrastructure/money-transfer.query.repository';
 import { MoneyTransferCrudApiService } from './api/services/money-transfer-create.service';
+import { StoreService } from '../clients/store.service';
 
 @Module({
   imports: [CqrsModule, TypeOrmModule.forFeature([Wallet, MoneyTransfer])],
@@ -27,6 +28,7 @@ import { MoneyTransferCrudApiService } from './api/services/money-transfer-creat
     MoneyTransferRepository,
     MoneyTransferQueryRepository,
     MoneyTransferCrudApiService,
+    StoreService,
   ],
   exports: [],
 })

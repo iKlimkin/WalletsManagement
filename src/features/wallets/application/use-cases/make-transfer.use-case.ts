@@ -1,12 +1,14 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler } from '@nestjs/cqrs';
+import { IsNumber, IsString } from 'class-validator';
 import { NotificationResponse } from '../../../../core/validation/notification';
+import { BaseUseCase } from '../../../../infrastructure/app/base-use-case';
+import { StoreService } from '../../../clients/store.service';
 import {
   MoneyMoneyTransferType,
   MoneyTransfer,
 } from '../../domain/entities/money-transfer.entity';
 import { MoneyTransferRepository } from '../../infrastructure/money-transfer.repository';
 import { WalletsRepository } from '../../infrastructure/wallets.repository';
-import { IsNumber, IsString } from 'class-validator';
 
 export class MakeMoneyTransferCommand {
   @IsString()
@@ -18,15 +20,19 @@ export class MakeMoneyTransferCommand {
 }
 
 @CommandHandler(MakeMoneyTransferCommand)
-export class MakeMoneyTransferUseCase
-  implements ICommandHandler<MakeMoneyTransferCommand>
-{
+export class MakeMoneyTransferUseCase extends BaseUseCase<
+  MakeMoneyTransferCommand,
+  MoneyTransfer
+> {
   constructor(
     private walletsRepository: WalletsRepository,
     private moneyTransferRepository: MoneyTransferRepository,
-  ) {}
+    storeService: StoreService,
+  ) {
+    super(storeService);
+  }
 
-  async execute(
+  protected async onExecute(
     command: MakeMoneyTransferCommand,
   ): Promise<NotificationResponse<MoneyTransfer>> {
     const { fromWalletId, toWalletId, amount } = command;
@@ -45,7 +51,7 @@ export class MakeMoneyTransferUseCase
     moneyTransfer.depositAmount = amount;
     moneyTransfer.type = MoneyMoneyTransferType.Transfer;
 
-    Promise.all([
+    await Promise.all([
       this.walletsRepository.save(fromWallet),
       this.walletsRepository.save(toWallet),
       this.moneyTransferRepository.save(moneyTransfer),

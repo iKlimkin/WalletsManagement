@@ -1,8 +1,13 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { NotificationResponse } from '../../../../core/validation/notification';
+import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
+import {
+  DomainNotificationResponse,
+  NotificationResponse,
+} from '../../../../core/validation/notification';
 import { CurrencyType, Wallet } from '../../domain/entities/wallet.entity';
 import { WalletsRepository } from '../../infrastructure/wallets.repository';
 import { IsString } from 'class-validator';
+import { BaseUseCase } from '../../../../infrastructure/app/base-use-case';
+import { StoreService } from '../../../clients/store.service';
 
 export class CreateWalletCommand {
   @IsString()
@@ -10,25 +15,23 @@ export class CreateWalletCommand {
 }
 
 @CommandHandler(CreateWalletCommand)
-export class CreateCreateWalletUseCase
-  implements ICommandHandler<CreateWalletCommand>
-{
-  constructor(private walletsRepository: WalletsRepository) {}
+export class CreateWalletUseCase extends BaseUseCase<
+  CreateWalletCommand,
+  Wallet
+> {
+  constructor(
+    private walletsRepository: WalletsRepository,
+    eventBus: EventBus,
+    storeService: StoreService,
+  ) {
+    super(storeService, eventBus);
+  }
 
-  async execute(
+  async onExecute(
     command: CreateWalletCommand,
-  ): Promise<NotificationResponse<Wallet>> {
-    const { clientId } = command;
-
-    const wallet = new Wallet();
-    wallet.id = crypto.randomUUID();
-    wallet.title = 'USD';
-    wallet.currency = CurrencyType.USD;
-    wallet.balance = 100;
-    wallet.clientId = clientId;
-
-    await this.walletsRepository.save(wallet);
-
-    return new NotificationResponse(wallet);
+  ): Promise<DomainNotificationResponse<Wallet>> {
+    const domainNotice = await Wallet.create(command);
+    await this.walletsRepository.save(domainNotice.data);
+    return domainNotice;
   }
 }

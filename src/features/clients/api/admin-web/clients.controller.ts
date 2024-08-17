@@ -16,13 +16,11 @@ import { CommandBus } from '@nestjs/cqrs';
 import { CreateClientCommand } from '../../application/use-cases/create-client.use-case';
 import { DeleteClientCommand } from '../../application/use-cases/delete-client.use-case';
 import { UpdateClientCommand } from '../../application/use-cases/update-client.use-case';
-import {
-  CreateClientDTO,
-  UpdateClientDTO,
-} from '../../domain/entities/client.entity';
 import { ClientsQueryRepository } from '../../infrastructure/clients.query.repository';
 import { ClientCrudApiService } from '../services/clients-curd-api.service';
 import { NavigateEnum } from '../../../../infrastructure/routing/base.prefix';
+import { CreateClientDTO } from '../../dto/create-client.dto';
+import { UpdateClientDTO } from '../../dto/update-client.dto';
 
 @Controller({ path: NavigateEnum.clients, scope: Scope.REQUEST })
 export class ClientsController {

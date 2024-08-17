@@ -1,30 +1,43 @@
-import { NotificationResponse } from '../../core/validation/notification';
+import { EventBus } from '@nestjs/cqrs';
+import { DomainNotificationResponse } from '../../core/validation/notification';
 import { StoreService } from '../../features/clients/store.service';
+import { BaseDomainAggregateEntity } from '../../core/base-domain-aggregate.entity';
 
 export abstract class BaseUseCase<TInputCommand, TOutputNotificationResponse> {
-  protected constructor(private readonly storeService: StoreService) {}
+  protected constructor(
+    protected readonly storeService: StoreService,
+    protected eventBus: EventBus,
+  ) {}
 
   protected abstract onExecute(
-    command: TInputCommand, // entityManager: EntityManager,
-  ): Promise<NotificationResponse<TOutputNotificationResponse>>;
+    command: TInputCommand,
+  ): Promise<DomainNotificationResponse<TOutputNotificationResponse>>;
 
   async execute(
     command: TInputCommand,
-  ): Promise<NotificationResponse<TOutputNotificationResponse>> {
+  ): Promise<DomainNotificationResponse<TOutputNotificationResponse>> {
     return await this.launchTransaction(command);
   }
 
   private async launchTransaction(
     data: TInputCommand,
-  ): Promise<NotificationResponse<TOutputNotificationResponse>> {
+  ): Promise<DomainNotificationResponse<TOutputNotificationResponse>> {
     const queryRunner = this.storeService.getStore().managerWrapper.queryRunner;
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      const result = await this.onExecute(data);
-      await queryRunner.commitTransaction();
-      return result;
+      const resultNotification = await this.onExecute(data);
+      if (resultNotification.hasError) {
+        await queryRunner.rollbackTransaction();
+      } else {
+        await queryRunner.commitTransaction();
+        // resultNotification.data.getUncommittedEvents()
+        console.log(resultNotification);
+        
+        resultNotification.events.forEach((e) => this.eventBus.publish(e));
+      }
+      return resultNotification;
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw new Error('Transaction failed');

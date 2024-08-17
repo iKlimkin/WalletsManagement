@@ -1,3 +1,4 @@
+import { AggregateRoot } from '@nestjs/cqrs';
 import {
   Column,
   CreateDateColumn,
@@ -6,7 +7,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-export class BaseDomainEntity {
+export class BaseDomainAggregateEntity extends AggregateRoot {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

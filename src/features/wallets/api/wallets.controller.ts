@@ -9,8 +9,6 @@ import {
   Delete,
 } from '@nestjs/common';
 import { WalletsService } from '../application/wallets.service';
-import { CreateWalletDto } from '../dto/create-wallet.dto';
-import { UpdateWalletDto } from '../dto/update-wallet.dto';
 import { MakeMoneyTransferCommand } from '../application/use-cases/make-transfer.use-case';
 import { WalletsCrudApiService } from './services/wallets-crud.api.service';
 import { CreateWalletCommand } from '../application/use-cases/create-wallet.use-case';
@@ -55,7 +53,7 @@ export class WalletsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateWalletDto: UpdateWalletDto) {
+  update(@Param('id') id: string, @Body() updateWalletDto: any) {
     return this.walletsService.update(+id, updateWalletDto);
   }
 

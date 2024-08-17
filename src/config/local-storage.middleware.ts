@@ -6,16 +6,18 @@ import { EntityManagerWrapper } from '../core/db/entity-manager.wrapper';
 
 export type StoreType = { managerWrapper: EntityManagerWrapper };
 
-export const asyncLocalStorage = new AsyncLocalStorage<StoreType>();
-
 @Injectable()
 export class AsyncStorageMiddleware implements NestMiddleware {
+  constructor(
+    private dataSource: DataSource,
+    private als: AsyncLocalStorage<StoreType>,
+  ) {}
+
   use(req: Request, res: Response, next: NextFunction) {
     const queryRunner = this.dataSource.createQueryRunner();
     const wrapper = new EntityManagerWrapper(queryRunner);
+    const store = { managerWrapper: wrapper };
 
-    asyncLocalStorage.run({ managerWrapper: wrapper }, () => next());
+    this.als.run(store, () => next());
   }
-
-  constructor(private dataSource: DataSource) {}
 }

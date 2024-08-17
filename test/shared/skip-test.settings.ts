@@ -18,8 +18,8 @@ const run = false;
 
 export const skipSettings: TestSettings = {
   run_all_tests: skip,
-  wallet: run,
-  client: skip,
+  wallet: skip,
+  client: run,
 
   for(testName: e2eTestNamesEnum): boolean {
     if (!this.run_all_tests) return false;

@@ -1,6 +1,9 @@
-import { CommandHandler } from '@nestjs/cqrs';
+import { CommandHandler, EventBus } from '@nestjs/cqrs';
 import { IsNumber, IsString } from 'class-validator';
-import { NotificationResponse } from '../../../../core/validation/notification';
+import {
+  DomainNotificationResponse,
+  NotificationResponse,
+} from '../../../../core/validation/notification';
 import { BaseUseCase } from '../../../../infrastructure/app/base-use-case';
 import { StoreService } from '../../../clients/store.service';
 import {
@@ -27,36 +30,43 @@ export class MakeMoneyTransferUseCase extends BaseUseCase<
   constructor(
     private walletsRepository: WalletsRepository,
     private moneyTransferRepository: MoneyTransferRepository,
-    storeService: StoreService,
+    protected storeService: StoreService,
+    protected eventBus: EventBus,
   ) {
-    super(storeService);
+    super(storeService, eventBus);
   }
 
   protected async onExecute(
     command: MakeMoneyTransferCommand,
-  ): Promise<NotificationResponse<MoneyTransfer>> {
+  ): Promise<DomainNotificationResponse<MoneyTransfer>> {
     const { fromWalletId, toWalletId, amount } = command;
 
     const fromWallet = await this.walletsRepository.getById(fromWalletId);
     const toWallet = await this.walletsRepository.getById(toWalletId);
 
-    fromWallet.balance -= amount;
-    toWallet.balance += amount;
+    const withdrawnNotice = fromWallet.withdrawMoney(amount);
+    const depositNotice = toWallet.depositMoney(amount);
 
-    const moneyTransfer = new MoneyTransfer();
-    moneyTransfer.id = crypto.randomUUID();
-    moneyTransfer.fromWalletId = fromWalletId;
-    moneyTransfer.toWalletId = toWalletId;
-    moneyTransfer.withdrawAmount = amount;
-    moneyTransfer.depositAmount = amount;
-    moneyTransfer.type = MoneyMoneyTransferType.Transfer;
+    const createdMoneyTransferNotice = await MoneyTransfer.create({
+      amount,
+      fromWalletId,
+      toWalletId,
+      type: MoneyMoneyTransferType.Transfer,
+    });
 
     await Promise.all([
       this.walletsRepository.save(fromWallet),
       this.walletsRepository.save(toWallet),
-      this.moneyTransferRepository.save(moneyTransfer),
+      this.moneyTransferRepository.save(createdMoneyTransferNotice.data),
     ]);
 
-    return new NotificationResponse(moneyTransfer);
+    const domainNoticeResponse =
+      DomainNotificationResponse.create(
+        createdMoneyTransferNotice,
+        withdrawnNotice,
+        depositNotice,
+      );
+
+    return domainNoticeResponse;
   }
 }

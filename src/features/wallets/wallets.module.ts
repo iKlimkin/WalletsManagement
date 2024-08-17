@@ -1,26 +1,33 @@
 import { Module } from '@nestjs/common';
-import { WalletsService } from './application/wallets.service';
-import { WalletsController } from './api/wallets.controller';
 import { CqrsModule } from '@nestjs/cqrs';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Wallet } from './domain/entities/wallet.entity';
-import { MoneyTransfer } from './domain/entities/money-transfer.entity';
-import { CreateCreateWalletUseCase } from './application/use-cases/create-wallet.use-case';
-import { WalletsRepository } from './infrastructure/wallets.repository';
-import { WalletsQueryRepository } from './infrastructure/wallets.query.repository';
-import { WalletsCrudApiService } from './api/services/wallets-crud.api.service';
-import { MakeMoneyTransferUseCase } from './application/use-cases/make-transfer.use-case';
-import { MoneyTransferRepository } from './infrastructure/money-transfer.repository';
-import { MoneyTransferQueryRepository } from './infrastructure/money-transfer.query.repository';
-import { MoneyTransferCrudApiService } from './api/services/money-transfer-create.service';
+import { AlsModule } from '../../als-module/als.module';
 import { StoreService } from '../clients/store.service';
+import { MoneyTransferCrudApiService } from './api/services/money-transfer-create.service';
+import { WalletsCrudApiService } from './api/services/wallets-crud.api.service';
+import { WalletsController } from './api/wallets.controller';
+import { NotifyClientMoneyDepositedEventHandler } from './application/event-handlers/notify-client-money-deposited.event-handler';
+import { NotifyClientMoneyWithdrawnEventHandler } from './application/event-handlers/notify-client-money-withdrawn.event-handler';
+import { CreateWalletUseCase } from './application/use-cases/create-wallet.use-case';
+import { MakeMoneyTransferUseCase } from './application/use-cases/make-transfer.use-case';
+import { WalletsService } from './application/wallets.service';
+import { MoneyTransfer } from './domain/entities/money-transfer.entity';
+import { Wallet } from './domain/entities/wallet.entity';
+import { MoneyTransferQueryRepository } from './infrastructure/money-transfer.query.repository';
+import { MoneyTransferRepository } from './infrastructure/money-transfer.repository';
+import { WalletsQueryRepository } from './infrastructure/wallets.query.repository';
+import { WalletsRepository } from './infrastructure/wallets.repository';
 
 @Module({
-  imports: [CqrsModule, TypeOrmModule.forFeature([Wallet, MoneyTransfer])],
+  imports: [
+    CqrsModule,
+    AlsModule,
+    TypeOrmModule.forFeature([Wallet, MoneyTransfer]),
+  ],
   controllers: [WalletsController],
   providers: [
     WalletsService,
-    CreateCreateWalletUseCase,
+    CreateWalletUseCase,
     MakeMoneyTransferUseCase,
     WalletsRepository,
     WalletsQueryRepository,
@@ -28,8 +35,10 @@ import { StoreService } from '../clients/store.service';
     MoneyTransferRepository,
     MoneyTransferQueryRepository,
     MoneyTransferCrudApiService,
+    NotifyClientMoneyWithdrawnEventHandler,
+    NotifyClientMoneyDepositedEventHandler,
     StoreService,
   ],
-  exports: [],
+  exports: [WalletsRepository, ],
 })
 export class WalletsModule {}

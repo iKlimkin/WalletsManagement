@@ -1,4 +1,4 @@
-import { NotificationResponse } from "./notification";
+import { NotificationResponse } from './notification';
 
 describe('NotificationResponse', () => {
   let notificationResponse: NotificationResponse;
@@ -13,7 +13,7 @@ describe('NotificationResponse', () => {
   });
 
   test('should return false for hasError when no errors', () => {
-    expect(notificationResponse.hasError()).toBe(false);
+    expect(notificationResponse.hasError).toBe(false);
   });
 
   test('should add an error with a default code', () => {
@@ -51,6 +51,6 @@ describe('NotificationResponse', () => {
   test('should return true for hasError when an error is added', () => {
     notificationResponse.addError('Error message');
 
-    expect(notificationResponse.hasError()).toBe(true);
+    expect(notificationResponse.hasError).toBe(true);
   });
 });

@@ -1,6 +1,10 @@
 import { Entity, Column, ManyToOne } from 'typeorm';
 import { BaseDomainEntity } from '../../../../core/baseEntity';
 import { Wallet } from './wallet.entity';
+import { MoneyTransferCreatedEvent } from '../events/money-transfer-created.event';
+import { validateEntity } from '../../../../core/validation/validation-utils';
+import { CreateMoneyTransferDTO } from '../../dto/create-money-transfer.dto';
+import { DomainNotificationResponse } from '../../../../core/validation/notification';
 
 @Entity()
 export class MoneyTransfer extends BaseDomainEntity {
@@ -24,6 +28,30 @@ export class MoneyTransfer extends BaseDomainEntity {
 
   @Column()
   type: MoneyMoneyTransferType;
+
+  static async create(
+    moneyTransferDto: CreateMoneyTransferDTO,
+  ): Promise<DomainNotificationResponse<MoneyTransfer>> {
+    const { fromWalletId, toWalletId, amount } = moneyTransferDto;
+    const moneyTransfer = new MoneyTransfer();
+    moneyTransfer.id = crypto.randomUUID();
+    moneyTransfer.fromWalletId = fromWalletId;
+    moneyTransfer.toWalletId = toWalletId;
+    moneyTransfer.withdrawAmount = amount;
+    moneyTransfer.depositAmount = amount;
+    moneyTransfer.type = MoneyMoneyTransferType.Transfer;
+
+    const transferCreatedEvent = new MoneyTransferCreatedEvent(
+      moneyTransfer.id,
+      moneyTransfer.fromWalletId,
+      moneyTransfer.toWalletId,
+      moneyTransfer.withdrawAmount,
+      moneyTransfer.depositAmount,
+      moneyTransfer.type,
+    );
+
+    return validateEntity(moneyTransfer, [transferCreatedEvent]);
+  }
 }
 export enum MoneyMoneyTransferType {
   Exchange = 0,

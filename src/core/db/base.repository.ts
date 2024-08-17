@@ -14,12 +14,23 @@ export class BaseRepository<T extends BaseDomainEntity> {
   ) {}
 
   async getById(id: string, options: { lock: boolean } = { lock: false }) {
-    let selectQueryBuilder = this.getRepository().createQueryBuilder('user');
+    let selectQueryBuilder = this.getRepository().createQueryBuilder();
     if (options.lock) {
       selectQueryBuilder = selectQueryBuilder.setLock('pessimistic_write');
     }
     const entity = await selectQueryBuilder.where({ id }).getOne();
     return entity;
+  }
+
+  async getMany(
+    filter: Partial<T>,
+    options: { lock: boolean } = { lock: false },
+  ): Promise<T[]> {
+    let selectQueryBuilder = this.getRepository().createQueryBuilder();
+    if (options.lock) {
+      selectQueryBuilder = selectQueryBuilder.setLock('pessimistic_write');
+    }
+    return await selectQueryBuilder.where(filter).getMany();
   }
 
   async save(entity: T): Promise<void> {

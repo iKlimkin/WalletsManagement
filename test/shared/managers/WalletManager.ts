@@ -1,15 +1,12 @@
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import {
-  CreateClientDTO,
-  UpdateClientDTO,
-} from '../../../src/features/clients/domain/entities/client.entity';
 import { SuperTestBody } from '../bodyTypes';
 import { NotificationResponse } from '../../../src/core/validation/notification';
 import { WalletViewModel } from '../../../src/features/wallets/infrastructure/wallets.query.repository';
 import { WalletsRouting } from '../../../src/infrastructure/routing/wallets.route';
 import { CreateWalletCommand } from '../../../src/features/wallets/application/use-cases/create-wallet.use-case';
 import { MakeMoneyTransferCommand } from '../../../src/features/wallets/application/use-cases/make-transfer.use-case';
+import { UpdateClientDTO } from '../../../src/features/clients/dto/update-client.dto';
 
 type WalletViewType = NotificationResponse<{ item: WalletViewModel }>;
 

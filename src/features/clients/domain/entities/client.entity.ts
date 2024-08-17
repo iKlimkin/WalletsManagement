@@ -1,12 +1,18 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { Length } from 'class-validator';
 import { randomUUID } from 'node:crypto';
 import { Column, Entity, OneToMany } from 'typeorm';
+import { BaseDomainAggregateEntity } from '../../../../core/base-domain-aggregate.entity';
 import { BaseDomainEntity } from '../../../../core/baseEntity';
+import {
+  DomainNotificationResponse,
+  NotificationResponse,
+} from '../../../../core/validation/notification';
 import { validateEntity } from '../../../../core/validation/validation-utils';
 import { Wallet } from '../../../wallets/domain/entities/wallet.entity';
 import { UpdateClientCommand } from '../../application/use-cases/update-client.use-case';
-import { NotificationResponse } from '../../../../core/validation/notification';
+import { CreateClientDTO } from '../../dto/create-client.dto';
+import { ClientUpdatedEvent } from '../events/client-updated.event';
+import { ClientCreatedEvent } from '../events/client-created.event';
+import { ClientDeletedEvent } from '../events/client-deleted.event';
 
 export const validationConstants = {
   firstName: {
@@ -24,7 +30,7 @@ export const validationConstants = {
 };
 
 @Entity()
-export class Client extends BaseDomainEntity {
+export class Client extends BaseDomainAggregateEntity {
   @Column()
   firstName: string;
 
@@ -48,35 +54,57 @@ export class Client extends BaseDomainEntity {
 
   static async createEntity(
     clientDto: CreateClientDTO,
-  ): Promise<NotificationResponse<Client>> {
+  ): Promise<DomainNotificationResponse<Client>> {
     const client = new Client();
 
     client.id = randomUUID();
     client.firstName = clientDto.firstName;
     client.lastName = clientDto.lastName;
-    client.status = ClientStatus.New;
+    client.status = ClientStatus.OnVerification;
 
-    return validateEntity(client);
+    const clientCreatedEvent = new ClientCreatedEvent(
+      client.id,
+      client.firstName,
+      client.lastName,
+      client.status,
+    );
+
+    return validateEntity(client, clientCreatedEvent);
   }
 
   async update(
     command: UpdateClientCommand,
-  ): Promise<NotificationResponse<Client>> {
+  ): Promise<DomainNotificationResponse<Client>> {
     if (command.dto.firstName) this.firstName = command.dto.firstName;
     if (command.dto.lastName) this.lastName = command.dto.lastName;
     if (typeof command.dto.address !== undefined)
       this.address = command.dto.address;
 
-    return validateEntity(this);
+    const clientUpdatedEvent = new ClientUpdatedEvent(this.id, command);
+    // this.apply(clientUpdatedEvent);
+
+    return validateEntity(this, clientUpdatedEvent);
+  }
+
+  async delete(wallets: Wallet[]) {
+    let domainNotice = new DomainNotificationResponse<Client>();
+    if (wallets.some((w) => w.balance > 0)) {
+      domainNotice.addError('Client has active wallets', null, 1);
+    } else {
+      this.status = ClientStatus.Deleted;
+      domainNotice.addEvents([new ClientDeletedEvent(this.id)]);
+    }
+    return domainNotice;
   }
 }
 
-enum ClientStatus {
+export enum ClientStatus {
   New,
   Active,
   Blocked,
   Rejected,
   OnVerification,
+  Deleted,
 }
 
 export class PassportScan extends BaseDomainEntity {
@@ -93,41 +121,4 @@ enum PassportScanStatus {
 export class FileInfo extends BaseDomainEntity {
   url: string;
   title: string;
-}
-
-export class CreateClientDTO {
-  @ApiProperty()
-  @Length(
-    validationConstants.firstName.minLength,
-    validationConstants.firstName.maxLength,
-  )
-  firstName: string;
-  @ApiProperty()
-  @Length(
-    validationConstants.lastName.minLength,
-    validationConstants.lastName.maxLength,
-  )
-  lastName: string;
-}
-
-export class UpdateClientDTO {
-  id: string;
-  @ApiProperty()
-  @Length(
-    validationConstants.firstName.minLength,
-    validationConstants.firstName.maxLength,
-  )
-  firstName?: string;
-  @ApiProperty()
-  @Length(
-    validationConstants.lastName.minLength,
-    validationConstants.lastName.maxLength,
-  )
-  lastName?: string;
-  @ApiProperty()
-  @Length(
-    validationConstants.address.minLength,
-    validationConstants.address.maxLength,
-  )
-  address?: string;
 }

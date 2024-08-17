@@ -2,16 +2,18 @@ import { HttpServer, HttpStatus, INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import {
   Client,
-  UpdateClientDTO,
-  validationConstants
+  validationConstants,
 } from '../../src/features/clients/domain/entities/client.entity';
-import { SecurityGovApiAdapter } from '../../src/features/clients/infrastructure/security-gov-api.adapter';
+import { SecurityGovApiAdapter } from '../../src/core/infrastructure/adapters/security-gov-api.adapter';
 import { NavigateEnum } from '../../src/infrastructure/routing/base.prefix';
 import { ClientsAdminRouting } from '../../src/infrastructure/routing/clients.route';
 import { aDescribe } from '../shared/aDescribe';
 import { ClientManager } from '../shared/managers/ClientManager';
 import { e2eTestNamesEnum, skipSettings } from '../shared/skip-test.settings';
 import { getAppForE2ETesting } from '../shared/tests.utils';
+import { SmtpAdapter } from '../../src/core/infrastructure/adapters/smtp.adapter';
+import { delay } from '../shared/delay';
+import { UpdateClientDTO } from '../../src/features/clients/dto/update-client.dto';
 
 aDescribe(skipSettings.for(e2eTestNamesEnum.CLIENT))(
   'ClientsController.admin.web (e2e)',
@@ -22,14 +24,22 @@ aDescribe(skipSettings.for(e2eTestNamesEnum.CLIENT))(
     const navigateClients = NavigateEnum.clients;
     let clientsManager: ClientManager;
     let securityMock: SecurityGovApiAdapter;
+    let smtpAdapterMock: SmtpAdapter;
     const lastScammerName = 'Smith';
     securityMock = {
       isScammer: async (firstName, lastName) => lastName === 'Smith',
     };
+    smtpAdapterMock = {
+      sendMail: jest.fn(async (mailDto: any) => {}),
+    };
 
     beforeAll(async () => {
       let settings = await getAppForE2ETesting((module) => {
-        module.overrideProvider(SecurityGovApiAdapter).useValue(securityMock);
+        module
+          .overrideProvider(SecurityGovApiAdapter)
+          .useValue(securityMock)
+          .overrideProvider(SmtpAdapter)
+          .useValue(smtpAdapterMock);
       });
 
       app = settings.app;
@@ -87,7 +97,7 @@ aDescribe(skipSettings.for(e2eTestNamesEnum.CLIENT))(
       expect(result.extensions.length).toBe(1);
       expect(result.extensions[0].key).toBe('firstName');
     });
-    it('/clients update full client entity (PATCH)', async () => {
+    it.only('/clients update full client entity (PATCH)', async () => {
       const notification = await Client.createEntity({
         firstName: 'firstName',
         lastName: 'lastName',
@@ -117,6 +127,8 @@ aDescribe(skipSettings.for(e2eTestNamesEnum.CLIENT))(
         createdClient.data!.item.id,
         updateClientDto,
       );
+
+      expect(smtpAdapterMock.sendMail).toHaveBeenCalledTimes(1);
 
       await clientsManager.updateClientAndCheck(
         createdClient.data!.item.id,

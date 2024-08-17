@@ -1,11 +1,11 @@
 import { ValidationError, validateOrReject } from 'class-validator';
 import { ValidationPipeErrorType } from '../../config/pipesSetup';
-import { NotificationResponse } from './notification';
+import { DomainNotificationResponse } from './notification';
 
 export class DomainError extends Error {
   constructor(
     message: string,
-    public notificationResponse: NotificationResponse,
+    public notificationResponse: DomainNotificationResponse,
   ) {
     super(message);
   }
@@ -15,11 +15,12 @@ export const validateEntityOrThrowAsync = async (entity: any) => {
   try {
     await validateOrReject(entity);
   } catch (error) {
-    const responseNotification: NotificationResponse = mapErrorsToNotification(
-      validationErrorsMapper.mapValidationErrorToValidationPipeErrorTArray(
-        error,
-      ),
-    );
+    const responseNotification: DomainNotificationResponse =
+      mapErrorsToNotification(
+        validationErrorsMapper.mapValidationErrorToValidationPipeErrorTArray(
+          error,
+        ),
+      );
     throw new DomainError(
       'domain entity validation error',
       responseNotification,
@@ -28,23 +29,29 @@ export const validateEntityOrThrowAsync = async (entity: any) => {
 };
 export const validateEntity = async <T extends Object>(
   entity: T,
-): Promise<NotificationResponse<T>> => {
+  ...events: any[]
+): Promise<DomainNotificationResponse<T>> => {
   try {
     await validateOrReject(entity);
   } catch (error) {
-    const responseNotification: NotificationResponse = mapErrorsToNotification(
-      validationErrorsMapper.mapValidationErrorToValidationPipeErrorTArray(
-        error,
-      ),
-    );
+    const responseNotification: DomainNotificationResponse<T> =
+      mapErrorsToNotification(
+        validationErrorsMapper.mapValidationErrorToValidationPipeErrorTArray(
+          error,
 
+        ),
+      );
+
+    responseNotification.addEvents(events);
     return responseNotification;
   }
-  return new NotificationResponse<T>(entity);
+  let domainNotificationResponse = new DomainNotificationResponse<T>(entity);
+  domainNotificationResponse.addEvents(events);
+  return domainNotificationResponse;
 };
 
 export const mapErrorsToNotification = (errors: ValidationPipeErrorType[]) => {
-  const resultNotification = new NotificationResponse();
+  const resultNotification = new DomainNotificationResponse();
   errors.forEach((error) => {
     resultNotification.addError(error.message, error.field, 1);
   });

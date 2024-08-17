@@ -1,13 +1,11 @@
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import {
-  CreateClientDTO,
-  UpdateClientDTO,
-} from '../../../src/features/clients/domain/entities/client.entity';
 import { ClientViewModel } from '../../../src/features/clients/infrastructure/clients.query.repository';
 import { ClientsAdminRouting } from '../../../src/infrastructure/routing/clients.route';
 import { SuperTestBody } from '../bodyTypes';
 import { NotificationResponse } from '../../../src/core/validation/notification';
+import { CreateClientDTO } from '../../../src/features/clients/dto/create-client.dto';
+import { UpdateClientDTO } from '../../../src/features/clients/dto/update-client.dto';
 
 type ClientViewType = NotificationResponse<{ item: ClientViewModel }>;
 

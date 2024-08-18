@@ -81,7 +81,6 @@ export class Client extends BaseDomainAggregateEntity {
       this.address = command.dto.address;
 
     const clientUpdatedEvent = new ClientUpdatedEvent(this.id, command);
-    // this.apply(clientUpdatedEvent);
 
     return validateEntity(this, clientUpdatedEvent);
   }

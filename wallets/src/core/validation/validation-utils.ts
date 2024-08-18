@@ -1,6 +1,7 @@
 import { ValidationError, validateOrReject } from 'class-validator';
 import { ValidationPipeErrorType } from '../../config/pipesSetup';
 import { DomainNotificationResponse } from './notification';
+import { IEvent } from '@nestjs/cqrs';
 
 export class DomainError extends Error {
   constructor(
@@ -29,7 +30,7 @@ export const validateEntityOrThrowAsync = async (entity: any) => {
 };
 export const validateEntity = async <T extends Object>(
   entity: T,
-  ...events: any[]
+  ...events: IEvent[]
 ): Promise<DomainNotificationResponse<T>> => {
   try {
     await validateOrReject(entity);

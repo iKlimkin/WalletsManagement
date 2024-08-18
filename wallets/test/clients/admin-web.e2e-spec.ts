@@ -51,6 +51,7 @@ aDescribe(skipSettings.for(e2eTestNamesEnum.CLIENT))(
 
     afterAll(async () => {
       await app.close();
+      jest.resetAllMocks();
     });
 
     it('/clients (GET)', async () => {
@@ -97,7 +98,7 @@ aDescribe(skipSettings.for(e2eTestNamesEnum.CLIENT))(
       expect(result.extensions.length).toBe(1);
       expect(result.extensions[0].key).toBe('firstName');
     });
-    it.only('/clients update full client entity (PATCH)', async () => {
+    it('/clients update full client entity (PATCH)', async () => {
       const notification = await Client.createEntity({
         firstName: 'firstName',
         lastName: 'lastName',

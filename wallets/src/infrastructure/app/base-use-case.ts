@@ -1,7 +1,6 @@
 import { EventBus } from '@nestjs/cqrs';
 import { DomainNotificationResponse } from '../../core/validation/notification';
 import { StoreService } from '../../features/clients/store.service';
-import { BaseDomainAggregateEntity } from '../../core/base-domain-aggregate.entity';
 
 export abstract class BaseUseCase<TInputCommand, TOutputNotificationResponse> {
   protected constructor(
@@ -32,9 +31,6 @@ export abstract class BaseUseCase<TInputCommand, TOutputNotificationResponse> {
         await queryRunner.rollbackTransaction();
       } else {
         await queryRunner.commitTransaction();
-        // resultNotification.data.getUncommittedEvents()
-        console.log(resultNotification);
-        
         resultNotification.events.forEach((e) => this.eventBus.publish(e));
       }
       return resultNotification;

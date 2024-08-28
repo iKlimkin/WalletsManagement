@@ -4,14 +4,15 @@ import {
   DomainNotificationResponse,
   NotificationResponse,
 } from '../../../../core/validation/notification';
-import { BaseUseCase } from '../../../../infrastructure/app/base-use-case';
-import { StoreService } from '../../../clients/store.service';
+import { StoreService } from '../../../../core/infrastructure/adapters/store.service';
 import {
   MoneyMoneyTransferType,
   MoneyTransfer,
 } from '../../domain/entities/money-transfer.entity';
 import { MoneyTransferRepository } from '../../infrastructure/money-transfer.repository';
 import { WalletsRepository } from '../../infrastructure/wallets.repository';
+import { BaseUseCase } from '../../../../core/app/base-use-case';
+import { BaseUseCaseServicesWrapper } from '../../../../core/infrastructure/base-use-cases-services.wrapper';
 
 export class MakeMoneyTransferCommand {
   @IsString()
@@ -30,10 +31,9 @@ export class MakeMoneyTransferUseCase extends BaseUseCase<
   constructor(
     private walletsRepository: WalletsRepository,
     private moneyTransferRepository: MoneyTransferRepository,
-    protected storeService: StoreService,
-    protected eventBus: EventBus,
+    baseUseCaseServicesWrapper: BaseUseCaseServicesWrapper,
   ) {
-    super(storeService, eventBus);
+    super(baseUseCaseServicesWrapper);
   }
 
   protected async onExecute(
@@ -60,12 +60,11 @@ export class MakeMoneyTransferUseCase extends BaseUseCase<
       this.moneyTransferRepository.save(createdMoneyTransferNotice.data),
     ]);
 
-    const domainNoticeResponse =
-      DomainNotificationResponse.create(
-        createdMoneyTransferNotice,
-        withdrawnNotice,
-        depositNotice,
-      );
+    const domainNoticeResponse = DomainNotificationResponse.create(
+      createdMoneyTransferNotice,
+      withdrawnNotice,
+      depositNotice,
+    );
 
     return domainNoticeResponse;
   }

@@ -1,13 +1,11 @@
-import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler, EventBus } from '@nestjs/cqrs';
 import { Client } from '../../domain/entities/client.entity';
-import { ClientsRepository } from '../../infrastructure/clients.repository';
-import {
-  DomainNotificationResponse,
-  NotificationResponse,
-} from '../../../../core/validation/notification';
 import { UpdateClientDTO } from '../../dto/update-client.dto';
-import { BaseUseCase } from '../../../../infrastructure/app/base-use-case';
-import { StoreService } from '../../store.service';
+import { ClientsRepository } from '../../infrastructure/clients.repository';
+
+import { StoreService } from '../../../../core/infrastructure/adapters/store.service';
+import { BaseUseCase } from '../../../../core/app/base-use-case';
+import { BaseUseCaseServicesWrapper } from '../../../../core/infrastructure/base-use-cases-services.wrapper';
 
 export class UpdateClientCommand {
   constructor(public readonly dto: UpdateClientDTO) {}
@@ -20,10 +18,9 @@ export class UpdateClientUseCase extends BaseUseCase<
 > {
   constructor(
     private clientsRepository: ClientsRepository,
-    eventBus: EventBus,
-    storeService: StoreService,
+    baseUseCaseServicesWrapper: BaseUseCaseServicesWrapper,
   ) {
-    super(storeService, eventBus);
+    super(baseUseCaseServicesWrapper);
   }
 
   async onExecute(command: UpdateClientCommand) {

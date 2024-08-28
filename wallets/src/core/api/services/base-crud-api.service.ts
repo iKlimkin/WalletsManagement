@@ -1,6 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
-import { BaseDomainEntity } from '../../baseEntity';
+import { BaseDomainEntity } from '../../entities/baseEntity';
 import { NotificationResponse } from '../../validation/notification';
 import { BaseQueryRepository } from '../../db/base.query.repository';
 

@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AlsModule } from '../../als-module/als.module';
-import { StoreService } from '../clients/store.service';
 import { MoneyTransferCrudApiService } from './api/services/money-transfer-create.service';
 import { WalletsCrudApiService } from './api/services/wallets-crud.api.service';
 import { WalletsController } from './api/wallets.controller';
@@ -37,8 +36,7 @@ import { WalletsRepository } from './infrastructure/wallets.repository';
     MoneyTransferCrudApiService,
     NotifyClientMoneyWithdrawnEventHandler,
     NotifyClientMoneyDepositedEventHandler,
-    StoreService,
   ],
-  exports: [WalletsRepository, ],
+  exports: [WalletsRepository],
 })
 export class WalletsModule {}

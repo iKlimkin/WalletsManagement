@@ -1,10 +1,11 @@
-import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler, EventBus } from '@nestjs/cqrs';
 import { ClientsRepository } from '../../infrastructure/clients.repository';
-import { BaseUseCase } from '../../../../infrastructure/app/base-use-case';
-import { Client } from '../../domain/entities/client.entity';
-import { StoreService } from '../../store.service';
-import { DomainNotificationResponse } from '../../../../core/validation/notification';
+
+import { StoreService } from '../../../../core/infrastructure/adapters/store.service';
 import { WalletsRepository } from '../../../wallets/infrastructure/wallets.repository';
+import { Client } from '../../domain/entities/client.entity';
+import { BaseUseCase } from '../../../../core/app/base-use-case';
+import { BaseUseCaseServicesWrapper } from '../../../../core/infrastructure/base-use-cases-services.wrapper';
 
 export class DeleteClientCommand {
   constructor(public readonly id: string) {}
@@ -18,10 +19,9 @@ export class DeleteClientUseCase extends BaseUseCase<
   constructor(
     private clientsRepository: ClientsRepository,
     private walletsRepo: WalletsRepository,
-    eventBus: EventBus,
-    storeService: StoreService,
+    baseUseCaseServicesWrapper: BaseUseCaseServicesWrapper,
   ) {
-    super(storeService, eventBus);
+    super(baseUseCaseServicesWrapper);
   }
 
   async onExecute(command: DeleteClientCommand) {

@@ -1,5 +1,5 @@
 import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
-import { BaseDomainEntity } from '../../../../core/baseEntity';
+import { BaseDomainEntity } from '../../../../core/entities/baseEntity';
 import { DomainNotificationResponse } from '../../../../core/validation/notification';
 import { Client } from '../../../clients/domain/entities/client.entity';
 import { MoneyDepositedEvent } from '../events/money-deposited.event';

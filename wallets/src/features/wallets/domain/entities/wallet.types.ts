@@ -1,4 +1,4 @@
-import { BaseDomainEntity } from '../../../../core/baseEntity';
+import { BaseDomainEntity } from '../../../../core/entities/baseEntity';
 import { Client } from '../../../clients/domain/entities/client.entity';
 import { Wallet } from './wallet.entity';
 

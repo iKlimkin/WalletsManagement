@@ -1,5 +1,5 @@
 import { Entity, Column, ManyToOne } from 'typeorm';
-import { BaseDomainEntity } from '../../../../core/baseEntity';
+import { BaseDomainEntity } from '../../../../core/entities/baseEntity';
 import { Wallet } from './wallet.entity';
 import { MoneyTransferCreatedEvent } from '../events/money-transfer-created.event';
 import { validateEntity } from '../../../../core/validation/validation-utils';

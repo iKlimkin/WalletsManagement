@@ -1,11 +1,10 @@
-import { EventBus } from '@nestjs/cqrs';
 import { DomainNotificationResponse } from '../../core/validation/notification';
-import { StoreService } from '../../features/clients/store.service';
+import { OutboxEvent } from '../entities/outbox-event.entity';
+import { BaseUseCaseServicesWrapper } from '../infrastructure/base-use-cases-services.wrapper';
 
 export abstract class BaseUseCase<TInputCommand, TOutputNotificationResponse> {
   protected constructor(
-    protected readonly storeService: StoreService,
-    protected eventBus: EventBus,
+    private readonly baseUseCaseServicesWrapper: BaseUseCaseServicesWrapper,
   ) {}
 
   protected abstract onExecute(
@@ -21,7 +20,9 @@ export abstract class BaseUseCase<TInputCommand, TOutputNotificationResponse> {
   private async launchTransaction(
     data: TInputCommand,
   ): Promise<DomainNotificationResponse<TOutputNotificationResponse>> {
-    const queryRunner = this.storeService.getStore().managerWrapper.queryRunner;
+    const { storeService, outboxRepository, eventBus } =
+      this.baseUseCaseServicesWrapper;
+    const queryRunner = storeService.getStore().managerWrapper.queryRunner;
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
@@ -30,13 +31,21 @@ export abstract class BaseUseCase<TInputCommand, TOutputNotificationResponse> {
       if (resultNotification.hasError) {
         await queryRunner.rollbackTransaction();
       } else {
+        const savedEvents = resultNotification.events.map((e) => {
+          const event = new OutboxEvent();
+          event.serviceName = 'shop';
+          event.eventName = e.constructor.name;
+          event.data = e;
+          return outboxRepository.save(event);
+        });
+        await Promise.all(savedEvents);
         await queryRunner.commitTransaction();
-        resultNotification.events.forEach((e) => this.eventBus.publish(e));
+        resultNotification.events.forEach((e) => eventBus.publish(e));
       }
       return resultNotification;
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      throw new Error('Transaction failed');
+      throw new Error('Transaction failed: ' + error);
     } finally {
       await queryRunner.release();
     }

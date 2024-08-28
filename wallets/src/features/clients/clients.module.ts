@@ -13,8 +13,8 @@ import { UpdateClientUseCase } from './application/use-cases/update-client.use-c
 import { Client } from './domain/entities/client.entity';
 import { ClientsQueryRepository } from './infrastructure/clients.query.repository';
 import { ClientsRepository } from './infrastructure/clients.repository';
-import { StoreService } from './store.service';
 import { WalletsModule } from '../wallets/wallets.module';
+import { CoreModule } from '../../core/modules/core.module';
 
 const eventHandlers = [ClientUpdatedEventHandler];
 const useCases = [
@@ -37,7 +37,6 @@ const useCases = [
     ClientsRepository,
     SecurityGovApiAdapter,
     ClientCrudApiService,
-    StoreService,
     ...eventHandlers,
     ...useCases,
   ],

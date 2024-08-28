@@ -1,18 +1,14 @@
 import { randomUUID } from 'node:crypto';
 import { Column, Entity, OneToMany } from 'typeorm';
-import { BaseDomainAggregateEntity } from '../../../../core/base-domain-aggregate.entity';
-import { BaseDomainEntity } from '../../../../core/baseEntity';
-import {
-  DomainNotificationResponse,
-  NotificationResponse,
-} from '../../../../core/validation/notification';
+import { BaseDomainEntity } from '../../../../core/entities/baseEntity';
+import { DomainNotificationResponse } from '../../../../core/validation/notification';
 import { validateEntity } from '../../../../core/validation/validation-utils';
 import { Wallet } from '../../../wallets/domain/entities/wallet.entity';
 import { UpdateClientCommand } from '../../application/use-cases/update-client.use-case';
 import { CreateClientDTO } from '../../dto/create-client.dto';
-import { ClientUpdatedEvent } from '../events/client-updated.event';
 import { ClientCreatedEvent } from '../events/client-created.event';
 import { ClientDeletedEvent } from '../events/client-deleted.event';
+import { ClientUpdatedEvent } from '../events/client-updated.event';
 
 export const validationConstants = {
   firstName: {
@@ -30,7 +26,7 @@ export const validationConstants = {
 };
 
 @Entity()
-export class Client extends BaseDomainAggregateEntity {
+export class Client extends BaseDomainEntity {
   @Column()
   firstName: string;
 

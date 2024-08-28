@@ -1,13 +1,12 @@
-import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
-import {
-  DomainNotificationResponse,
-  NotificationResponse,
-} from '../../../../core/validation/notification';
-import { CurrencyType, Wallet } from '../../domain/entities/wallet.entity';
-import { WalletsRepository } from '../../infrastructure/wallets.repository';
+import { CommandHandler, EventBus } from '@nestjs/cqrs';
 import { IsString } from 'class-validator';
-import { BaseUseCase } from '../../../../infrastructure/app/base-use-case';
-import { StoreService } from '../../../clients/store.service';
+import { DomainNotificationResponse } from '../../../../core/validation/notification';
+import { Wallet } from '../../domain/entities/wallet.entity';
+import { WalletsRepository } from '../../infrastructure/wallets.repository';
+
+import { BaseUseCase } from '../../../../core/app/base-use-case';
+import { StoreService } from '../../../../core/infrastructure/adapters/store.service';
+import { BaseUseCaseServicesWrapper } from '../../../../core/infrastructure/base-use-cases-services.wrapper';
 
 export class CreateWalletCommand {
   @IsString()
@@ -21,10 +20,9 @@ export class CreateWalletUseCase extends BaseUseCase<
 > {
   constructor(
     private walletsRepository: WalletsRepository,
-    eventBus: EventBus,
-    storeService: StoreService,
+    baseUseCaseServicesWrapper: BaseUseCaseServicesWrapper,
   ) {
-    super(storeService, eventBus);
+    super(baseUseCaseServicesWrapper);
   }
 
   async onExecute(

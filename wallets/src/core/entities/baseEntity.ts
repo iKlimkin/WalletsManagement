@@ -1,24 +1,22 @@
-import { AggregateRoot } from '@nestjs/cqrs';
 import {
   Column,
   CreateDateColumn,
-  PrimaryColumn,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
+  UpdateDateColumn
 } from 'typeorm';
 
-export class BaseDomainAggregateEntity extends AggregateRoot {
+export class BaseDomainEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  createdAt: string;
+  createdAt: Date;
 
   @UpdateDateColumn()
-  updatedAt: string;
+  updatedAt: Date;
 
   @Column({ nullable: true })
-  createBy: string;
+  createBy: Date;
   @Column({ nullable: true })
-  updateBy: string;
+  updateBy: Date;
 }

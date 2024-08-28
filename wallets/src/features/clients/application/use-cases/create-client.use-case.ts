@@ -1,14 +1,11 @@
-import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
-import { Client } from '../../domain/entities/client.entity';
-import { ClientsRepository } from '../../infrastructure/clients.repository';
+import { CommandHandler } from '@nestjs/cqrs';
 import { SecurityGovApiAdapter } from '../../../../core/infrastructure/adapters/security-gov-api.adapter';
-import {
-  DomainNotificationResponse,
-  NotificationResponse,
-} from '../../../../core/validation/notification';
+import { DomainNotificationResponse } from '../../../../core/validation/notification';
+import { Client } from '../../domain/entities/client.entity';
 import { CreateClientDTO } from '../../dto/create-client.dto';
-import { BaseUseCase } from '../../../../infrastructure/app/base-use-case';
-import { StoreService } from '../../store.service';
+import { ClientsRepository } from '../../infrastructure/clients.repository';
+import { BaseUseCase } from '../../../../core/app/base-use-case';
+import { BaseUseCaseServicesWrapper } from '../../../../core/infrastructure/base-use-cases-services.wrapper';
 
 export class CreateClientCommand {
   constructor(public readonly dto: CreateClientDTO) {}
@@ -22,10 +19,9 @@ export class CreateClientUseCase extends BaseUseCase<
   constructor(
     private clientsRepository: ClientsRepository,
     private readonly security: SecurityGovApiAdapter,
-    protected eventBus: EventBus,
-    protected storeService: StoreService,
+    baseUseCaseServicesWrapper: BaseUseCaseServicesWrapper,
   ) {
-    super(storeService, eventBus);
+    super(baseUseCaseServicesWrapper);
   }
 
   async onExecute(
@@ -43,8 +39,8 @@ export class CreateClientUseCase extends BaseUseCase<
 
     const domainNotification = await Client.createEntity(dto);
     if (domainNotification.hasError) return domainNotification;
+
     await this.clientsRepository.save(domainNotification.data);
-    this.eventBus.publishAll(domainNotification.data.getUncommittedEvents());
 
     return domainNotification;
   }

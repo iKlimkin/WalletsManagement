@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { StoreType } from '../../config/local-storage.middleware';
+import { StoreType } from '../../../config/local-storage.middleware';
 import { AsyncLocalStorage } from 'node:async_hooks';
 
 @Injectable()

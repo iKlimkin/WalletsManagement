@@ -99,24 +99,24 @@ export class Client extends BaseDomainEntity {
 
   @AfterLoad()
   initStatusState(): void {
-    switch (this.status) {
-      case ClientStatus.New:
-        this.clientStatusState = new ClientNewState(this);
-      case ClientStatus.OnVerification:
-        this.clientStatusState = new ClientOnVerificationState(this);
-      case ClientStatus.Active:
-        this.clientStatusState = new ClientActiveState(this);
-      case ClientStatus.Rejected:
-        this.clientStatusState = new ClientRejectedState(this);
-      case ClientStatus.Blocked:
-        this.clientStatusState = new ClientBlockedState(this);
-      case ClientStatus.Deleted:
-        this.clientStatusState = new ClientDeletedState(this);
-      default:
-        throw new Error(
-          'ClientStatusState is not registered for this status: ' + this.status,
-        );
+    const stateMap = new Map<ClientStatus, IClientStatusState>([
+      [ClientStatus.New, new ClientNewState(this)],
+      [ClientStatus.OnVerification, new ClientOnVerificationState(this)],
+      [ClientStatus.Active, new ClientActiveState(this)],
+      [ClientStatus.Rejected, new ClientRejectedState(this)],
+      [ClientStatus.Blocked, new ClientBlockedState(this)],
+      [ClientStatus.Deleted, new ClientDeletedState(this)],
+    ]);
+
+    const clientState = stateMap.get(this.status);
+
+    if (!clientState) {
+      throw new Error(
+        'ClientStatusState is not registered for this status: ' + this.status,
+      );
     }
+
+    this.clientStatusState = clientState;
   }
 
   activate() {

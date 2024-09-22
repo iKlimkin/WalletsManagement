@@ -1,4 +1,4 @@
-import { UpdateClientCommand } from '../../application/use-cases/update-client.use-case';
+import { UpdateClientCommand } from '../../../../application/use-cases/update-client.use-case';
 
 export class ClientUpdatedEvent {
   public firstName?: string;

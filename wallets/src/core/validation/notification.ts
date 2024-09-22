@@ -33,7 +33,7 @@ export class DomainNotificationResponse<
   TData = null,
 > extends NotificationResponse<TData> {
   public events: IEvent[] = [];
-  addEvents(events: IEvent[]) {
+  addEvents(...events: IEvent[]) {
     this.events = [...this.events, ...events];
   }
 

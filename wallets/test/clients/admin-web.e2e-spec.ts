@@ -3,7 +3,7 @@ import * as request from 'supertest';
 import {
   Client,
   validationConstants,
-} from '../../src/features/clients/domain/entities/client.entity';
+} from '../../src/features/clients/domain/entities/client/client.entity';
 import { SecurityGovApiAdapter } from '../../src/core/infrastructure/adapters/security-gov-api.adapter';
 import { NavigateEnum } from '../../src/infrastructure/routing/base.prefix';
 import { ClientsAdminRouting } from '../../src/infrastructure/routing/clients.route';

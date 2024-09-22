@@ -1,7 +1,7 @@
 import { CommandHandler } from '@nestjs/cqrs';
 import { SecurityGovApiAdapter } from '../../../../core/infrastructure/adapters/security-gov-api.adapter';
 import { DomainNotificationResponse } from '../../../../core/validation/notification';
-import { Client } from '../../domain/entities/client.entity';
+import { Client } from '../../domain/entities/client/client.entity';
 import { CreateClientDTO } from '../../dto/create-client.dto';
 import { ClientsRepository } from '../../infrastructure/clients.repository';
 import { BaseUseCase } from '../../../../core/app/base-use-case';

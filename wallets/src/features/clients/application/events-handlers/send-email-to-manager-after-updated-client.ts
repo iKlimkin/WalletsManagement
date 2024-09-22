@@ -1,7 +1,7 @@
 import { EventsHandler, IEventHandler } from '@nestjs/cqrs';
 import { SmtpAdapter } from '../../../../core/infrastructure/adapters/smtp.adapter';
-import { ClientUpdatedEvent } from '../../domain/events/client-updated.event';
 import { ClientsRepository } from '../../infrastructure/clients.repository';
+import { ClientUpdatedEvent } from '../../domain/entities/client/events/client-updated.event';
 
 @EventsHandler(ClientUpdatedEvent)
 export class ClientUpdatedEventHandler

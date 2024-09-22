@@ -3,7 +3,7 @@ import { ClientsRepository } from '../../infrastructure/clients.repository';
 
 import { StoreService } from '../../../../core/infrastructure/adapters/store.service';
 import { WalletsRepository } from '../../../wallets/infrastructure/wallets.repository';
-import { Client } from '../../domain/entities/client.entity';
+import { Client } from '../../domain/entities/client/client.entity';
 import { BaseUseCase } from '../../../../core/app/base-use-case';
 import { BaseUseCaseServicesWrapper } from '../../../../core/infrastructure/base-use-cases-services.wrapper';
 

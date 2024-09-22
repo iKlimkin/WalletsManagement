@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Length } from 'class-validator';
-import { validationConstants } from '../domain/entities/client.entity';
+import { validationConstants } from '../domain/entities/client/client.entity';
 
 export class CreateClientDTO {
   @ApiProperty()

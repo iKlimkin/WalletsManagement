@@ -1,4 +1,4 @@
-import { ClientStatus } from '../entities/client.entity';
+import { ClientStatus } from '../client.entity';
 
 export class ClientCreatedEvent {
   constructor(

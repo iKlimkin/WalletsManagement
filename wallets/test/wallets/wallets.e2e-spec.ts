@@ -4,7 +4,7 @@ import { WalletsRouting } from '../../src/infrastructure/routing/wallets.route';
 import { ClientManager } from '../shared/managers/ClientManager';
 import { WalletManager } from '../shared/managers/WalletManager';
 import { getAppForE2ETesting, truncateDBTables } from '../shared/tests.utils';
-import { Client } from '../../src/features/clients/domain/entities/client.entity';
+import { Client } from '../../src/features/clients/domain/entities/client/client.entity';
 import { aDescribe } from '../shared/aDescribe';
 import { e2eTestNamesEnum, skipSettings } from '../shared/skip-test.settings';
 

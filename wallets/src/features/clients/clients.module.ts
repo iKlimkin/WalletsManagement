@@ -10,11 +10,13 @@ import { ClientUpdatedEventHandler } from './application/events-handlers/send-em
 import { CreateClientUseCase } from './application/use-cases/create-client.use-case';
 import { DeleteClientUseCase } from './application/use-cases/delete-client.use-case';
 import { UpdateClientUseCase } from './application/use-cases/update-client.use-case';
-import { Client } from './domain/entities/client.entity';
+import { Client } from './domain/entities/client/client.entity';
 import { ClientsQueryRepository } from './infrastructure/clients.query.repository';
 import { ClientsRepository } from './infrastructure/clients.repository';
 import { WalletsModule } from '../wallets/wallets.module';
 import { CoreModule } from '../../core/modules/core.module';
+import { UpdateClientPassportUseCase } from './application/use-cases/update-passport-data-client.use-case';
+import { RejectClientUseCase } from './application/use-cases/reject-client.use-case';
 
 const eventHandlers = [ClientUpdatedEventHandler];
 const useCases = [
@@ -37,6 +39,8 @@ const useCases = [
     ClientsRepository,
     SecurityGovApiAdapter,
     ClientCrudApiService,
+    UpdateClientPassportUseCase,
+    RejectClientUseCase,
     ...eventHandlers,
     ...useCases,
   ],

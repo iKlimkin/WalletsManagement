@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BaseQueryRepository } from '../../../core/db/base.query.repository';
-import { Client } from '../domain/entities/client.entity';
+import { Client } from '../domain/entities/client/client.entity';
 
 @Injectable()
 export class ClientsQueryRepository

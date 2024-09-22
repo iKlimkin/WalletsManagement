@@ -1,5 +1,5 @@
 import { BaseDomainEntity } from '../../../../core/entities/baseEntity';
-import { Client } from '../../../clients/domain/entities/client.entity';
+import { Client } from '../../../clients/domain/entities/client/client.entity';
 import { Wallet } from './wallet.entity';
 
 export class WalletLimits extends BaseDomainEntity {

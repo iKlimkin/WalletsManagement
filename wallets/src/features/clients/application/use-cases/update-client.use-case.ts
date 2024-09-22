@@ -1,5 +1,5 @@
 import { CommandHandler, EventBus } from '@nestjs/cqrs';
-import { Client } from '../../domain/entities/client.entity';
+import { Client } from '../../domain/entities/client/client.entity';
 import { UpdateClientDTO } from '../../dto/update-client.dto';
 import { ClientsRepository } from '../../infrastructure/clients.repository';
 

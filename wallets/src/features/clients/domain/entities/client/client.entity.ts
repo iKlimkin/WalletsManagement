@@ -87,7 +87,7 @@ export class Client extends BaseDomainEntity {
     if (lastName) this.lastName = lastName;
     if (typeof address !== 'undefined') this.address = command.dto.address;
 
-    const clientUpdatedEvent = new ClientUpdatedEvent(this.id, command);
+    const clientUpdatedEvent = new ClientUpdatedEvent(this.id, command.dto);
 
     return validateEntity(this, clientUpdatedEvent);
   }

@@ -1,16 +1,48 @@
-import { UpdateClientCommand } from '../../../../application/use-cases/update-client.use-case';
+import { UpdateClientDTO } from '../../../../dto/update-client.dto';
 
-export class ClientUpdatedEvent {
+export type DomainEventMeta = {
+  type: string;
+  date: Date;
+  userId: string | null;
+  requestId: string;
+};
+
+export abstract class DomainEvent {
+  private type: string;
+  public meta: DomainEventMeta;
+
+  constructor(type: string) {
+    this.type = type;
+  }
+
+  public setMeta(meta: DomainEventMeta) {
+    this.meta = {
+      ...meta,
+      type: this.type,
+    };
+  }
+}
+
+export class ClientUpdatedEvent extends DomainEvent {
+  static type = 'finance/wallet/client-updated';
+  public clientId: string;
+
   public firstName?: string;
   public lastName?: string;
-  public address?: string;
-  constructor(
-    public readonly clientId: string,
-    private command: UpdateClientCommand,
-  ) {
-    const { dto } = this.command;
-    if (dto.address) this.address = dto.address;
-    if (dto.firstName) this.firstName = dto.firstName;
-    if (dto.lastName) this.lastName = dto.lastName;
+  public address?: string | null;
+
+  constructor(clientId: string, command: UpdateClientDTO) {
+    super(ClientUpdatedEvent.type);
+    this.clientId = clientId;
+
+    if (typeof command.address !== 'undefined') {
+      this.address = command.address;
+    }
+    if (command.firstName) {
+      this.lastName = command.firstName;
+    }
+    if (command.lastName) {
+      this.lastName = command.lastName;
+    }
   }
 }

@@ -81,16 +81,17 @@ export class DomainNotificationResponse<
     if (!!mainNotice.data) {
       domainNotice.addData(mainNotice.data);
     }
-    domainNotice.events = mainNotice.events;
+    domainNotice.events.push(...mainNotice.events);
 
-    mainNotice.extensions.forEach(({ message, key, code }) =>
-      domainNotice.addError(message, key, code),
-    );
+    const addMainErrors = (notice: DomainNotificationResponse<T>) => {
+      notice.extensions.forEach(({ message, key, code }) => {
+        domainNotice.addError(message, key, code);
+      });
+    };
+    addMainErrors(mainNotice);
     otherNotifications.forEach((notice) => {
-      domainNotice.events = [...domainNotice.events, ...notice.events];
-      notice.extensions.forEach(({ message, key, code }) =>
-        domainNotice.addError(message, key, code),
-      );
+      domainNotice.events.push(...notice.events);
+      addMainErrors(notice);
     });
 
     return domainNotice;

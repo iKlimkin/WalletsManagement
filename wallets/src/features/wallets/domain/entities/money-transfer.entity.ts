@@ -34,6 +34,21 @@ export class MoneyTransfer extends BaseDomainEntity {
   ): Promise<DomainNotificationResponse<MoneyTransfer>> {
     const { fromWalletId, toWalletId, amount } = moneyTransferDto;
     const moneyTransfer = new MoneyTransfer();
+
+    const notification = new DomainNotificationResponse<MoneyTransfer>();
+
+    if (
+      moneyTransferDto.amount > 1000 &&
+      moneyTransferDto.fromWalletId === 'id34344...'
+    ) {
+      notification.addError(
+        'impossible make transfer more then 1000 for superAdmin',
+        'amount',
+        14,
+      );
+      return notification;
+    }
+
     moneyTransfer.id = crypto.randomUUID();
     moneyTransfer.fromWalletId = fromWalletId;
     moneyTransfer.toWalletId = toWalletId;

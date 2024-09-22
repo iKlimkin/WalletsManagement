@@ -51,7 +51,7 @@ export class BaseRepository<T extends BaseDomainEntity> {
     return await selectQueryBuilder.where(filter).getMany();
   }
 
-  async save(entity: T): Promise<void> {
+  async save(...entity: T[]): Promise<void> {
     await this.getRepository().save(entity);
   }
 

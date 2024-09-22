@@ -60,7 +60,7 @@ export class MakeMoneyTransferUseCase extends BaseUseCase<
       this.moneyTransferRepository.save(createdMoneyTransferNotice.data),
     ]);
 
-    const domainNoticeResponse = DomainNotificationResponse.create(
+    const domainNoticeResponse = DomainNotificationResponse.merge(
       createdMoneyTransferNotice,
       withdrawnNotice,
       depositNotice,

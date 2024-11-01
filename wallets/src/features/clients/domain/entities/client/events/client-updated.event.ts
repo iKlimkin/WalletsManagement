@@ -1,27 +1,5 @@
+import { DomainEvent } from '../../../../../../core/app/domain/domain-event';
 import { UpdateClientDTO } from '../../../../dto/update-client.dto';
-
-export type DomainEventMeta = {
-  type: string;
-  date: Date;
-  userId: string | null;
-  requestId: string;
-};
-
-export abstract class DomainEvent {
-  private type: string;
-  public meta: DomainEventMeta;
-
-  constructor(type: string) {
-    this.type = type;
-  }
-
-  public setMeta(meta: DomainEventMeta) {
-    this.meta = {
-      ...meta,
-      type: this.type,
-    };
-  }
-}
 
 export class ClientUpdatedEvent extends DomainEvent {
   static type = 'finance/wallet/client-updated';

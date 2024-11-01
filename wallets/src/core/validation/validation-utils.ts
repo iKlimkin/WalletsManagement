@@ -35,13 +35,10 @@ export const validateEntity = async <T extends Object>(
   try {
     await validateOrReject(entity);
   } catch (error) {
+    const mappedErrors =
+      validationErrorsMapper.mapValidationErrorToValidationPipeErrorTArray(error);
     const responseNotification: DomainNotificationResponse<T> =
-      mapErrorsToNotification(
-        validationErrorsMapper.mapValidationErrorToValidationPipeErrorTArray(
-          error,
-
-        ),
-      );
+      mapErrorsToNotification(mappedErrors);
 
     responseNotification.addEvents(events);
     return responseNotification;
@@ -53,8 +50,8 @@ export const validateEntity = async <T extends Object>(
 
 export const mapErrorsToNotification = (errors: ValidationPipeErrorType[]) => {
   const resultNotification = new DomainNotificationResponse();
-  errors.forEach((error) => {
-    resultNotification.addError(error.message, error.field, 1);
+  errors.forEach(({ message, field }) => {
+    resultNotification.addError(message, field, 1);
   });
   return resultNotification;
 };

@@ -19,5 +19,11 @@
     "noFallthroughCasesInSwitch": false,
     "types": ["jest"]
   },
-  "include": ["src/**/*", "test/**/*.ts"]
+  "include": ["src/**/*", "test/**/*.ts"],
+  "watchOptions": {
+    // if you want reload your project inside container when change ts file, you can use this option
+    "watchFile": "dynamicPriorityPolling",
+    "watchDirectory": "dynamicPriorityPolling",
+    "excludeDirectories": ["**/node_modules", "dist"]
+  }
 }

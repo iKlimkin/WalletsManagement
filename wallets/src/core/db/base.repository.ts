@@ -1,6 +1,11 @@
 import { BaseDomainEntity } from '../entities/baseEntity';
 import { StoreService } from '../infrastructure/adapters/store.service';
 
+export enum SortDirection {
+  ASC = 'ASC',
+  DESC = 'DESC',
+}
+
 export interface IBaseRepository<T> {
   getById(id: string): Promise<T>;
   save(entity: T): Promise<void>;
@@ -10,7 +15,7 @@ export interface IBaseRepository<T> {
 export class BaseRepository<T extends BaseDomainEntity> {
   constructor(
     public storeService: StoreService,
-    protected _class: any,
+    protected _class: new () => T,
   ) {}
 
   async getById(id: string, options: { lock: boolean } = { lock: true }) {
@@ -70,8 +75,3 @@ export type SortProperty<TPropertyName> = {
   propertyName: TPropertyName;
   direction: SortDirection;
 };
-
-export enum SortDirection {
-  ASC = 'ASC',
-  DESC = 'DESC',
-}

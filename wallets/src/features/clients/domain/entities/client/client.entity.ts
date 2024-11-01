@@ -168,3 +168,7 @@ class PassportInfo extends BaseDomainEntity {
   public number: string;
   public issueDate: Date;
 }
+
+/**
+ * Add interceptor commit
+ */

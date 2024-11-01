@@ -69,7 +69,7 @@ export class MoneyTransfer extends BaseDomainEntity {
   }
 }
 export enum MoneyMoneyTransferType {
-  Exchange = 0,
-  Transfer = 1,
-  Deposit = 2,
+  Exchange,
+  Transfer,
+  Deposit,
 }
